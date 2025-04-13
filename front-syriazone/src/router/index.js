@@ -2,12 +2,30 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import LoginPage from "../views/LoginPage.vue";
 import SignupPage from "../views/SignupPage.vue";
+import AdminPage from "../views/AdminPage.vue";
+import AddCategory from "../views/AddCategory.vue";
+import AddSubCategory from "../views/AddSubCategory.vue";
 
 const routes = [
   {
     path: "/",
     name: "home",
     component: HomeView,
+  },
+  {
+    path: "/AddSubCategory",
+    name: "AddSubCategory",
+    component: AddSubCategory,
+  },
+  {
+    path: "/AddCategory",
+    name: "AddCategory",
+    component: AddCategory,
+  },
+  {
+    path: "/AdminPage",
+    name: "AdminPage",
+    component: AdminPage,
   },
   {
     path: "/signup",

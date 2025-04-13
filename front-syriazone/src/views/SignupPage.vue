@@ -48,6 +48,21 @@
         </div>
         <button type="submit" class="signup-button">Create Account</button>
       </form>
+
+      <!-- أزرار التسجيل عبر فيسبوك وجيميل -->
+      <div class="social-signup">
+        <p>or sign up with:</p>
+        <button
+          class="social-button facebook-button"
+          @click="signUpWithFacebook"
+        >
+          Facebook
+        </button>
+        <button class="social-button google-button" @click="signUpWithGoogle">
+          Google
+        </button>
+      </div>
+
       <div class="other-options">
         <p>
           By creating an account, you agree to SyriaZone's
@@ -63,6 +78,9 @@
 </template>
 
 <script>
+import { postData } from "@/api";
+import { useToast } from "vue-toastification";
+
 export default {
   data() {
     return {
@@ -73,20 +91,30 @@ export default {
     };
   },
   methods: {
-    handleSubmit() {
-      // Validate if passwords match
+    async handleSubmit() {
+      const toast = useToast();
+
       if (this.password !== this.confirmPassword) {
-        alert("Passwords do not match!");
+        toast.error("Passwords do not match!");
         return;
       }
 
-      if (this.name && this.email && this.password) {
-        // Normally, here you would create the user account.
-        // For now, we'll just log a success message (or you can redirect them).
-        alert("Account created successfully!");
-        this.$router.push("/login"); // Redirect to login page after successful account creation
-      } else {
-        alert("Please fill out all fields correctly.");
+      if (!this.name || !this.email || !this.password) {
+        toast.error("Please fill out all fields correctly.");
+        return;
+      }
+
+      const userData = {
+        name: this.name,
+        email: this.email,
+        password: this.password,
+      };
+      try {
+        const response = await postData("/api/register", userData);
+        console.log(response);
+        this.$router.push("/LoginPage");
+      } catch (error) {
+        console.error("Error posting data:", error);
       }
     },
   },
@@ -101,6 +129,34 @@ export default {
   align-items: center;
   height: 100vh;
   background-color: #f1f1f1;
+}
+.social-signup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.social-button {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.facebook-button {
+  background-color: #3b5998; /* لون فيسبوك */
+}
+
+.google-button {
+  background-color: #db4437; /* لون جوجل */
+}
+
+.signin-link:hover {
+  text-decoration: underline;
 }
 
 .signup-container {
