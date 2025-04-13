@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import { postData } from "@/api";
 export default {
   data() {
     return {
@@ -53,14 +54,29 @@ export default {
     };
   },
   methods: {
-    handleSubmit() {
-      // Logic to validate user credentials and proceed (Here we're just logging for now)
-      if (this.email && this.password) {
-        // Normally, here you would verify the credentials and log the user in.
-        // For now, we'll just log the user in (or you can redirect them to another page).
-        this.$router.push("/home"); // Redirecting to the home page after login
-      } else {
-        alert("Please enter valid credentials");
+    async handleSubmit() {
+      const userData = {
+        email: this.email,
+        password: this.password,
+      };
+      try {
+        const response = await postData("/api/login", userData);
+        console.log(response);
+        if (response.status == 200)
+          if (response.data.access_token.original.user_type == "Admin") {
+            window.localStorage.setItem(
+              "access_token",
+              response.data.access_token.original.token
+            );
+            window.localStorage.setItem(
+              "user_type",
+              response.data.access_token.original.user_type
+            );
+
+            this.$router.push("/AdminPage");
+          }
+      } catch (error) {
+        console.error("Error posting data:", error);
       }
     },
   },
