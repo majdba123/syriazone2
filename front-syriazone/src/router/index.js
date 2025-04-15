@@ -3,14 +3,50 @@ import HomeView from "../views/HomeView.vue";
 import LoginPage from "../views/LoginPage.vue";
 import SignupPage from "../views/SignupPage.vue";
 import AdminPage from "../views/AdminPage.vue";
+import Vendorlogin from "../views/Vendorlogin.vue";
 import AddCategory from "../views/AddCategory.vue";
 import AddSubCategory from "../views/AddSubCategory.vue";
+import VendorPage from "../views/VendorPage.vue";
+import ProductSearch from "../views/ProductSearch.vue";
+import CategoryVendor from "../views/CategoryVendor.vue";
+import SubcategoryVendor from "../views/SubcategoryVendor.vue";
+import AddProduct from "../views/AddProduct.vue";
 
 const routes = [
   {
     path: "/",
     name: "home",
     component: HomeView,
+  },
+  {
+    path: "/SubcategoryVendor",
+    name: "SubcategoryVendor",
+    component: SubcategoryVendor,
+  },
+  {
+    path: "/AddProduct",
+    name: "AddProduct",
+    component: AddProduct,
+  },
+  {
+    path: "/CategoryVendor",
+    name: "CategoryVendor",
+    component: CategoryVendor,
+  },
+  {
+    path: "/Vendorlogin",
+    name: "Vendorlogin",
+    component: Vendorlogin,
+  },
+  {
+    path: "/vendors",
+    name: "VendorPage",
+    component: VendorPage,
+  },
+  {
+    path: "/products",
+    name: "ProductSearch",
+    component: ProductSearch,
   },
   {
     path: "/AddSubCategory",
@@ -40,9 +76,6 @@ const routes = [
   {
     path: "/about",
     name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },

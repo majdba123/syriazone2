@@ -14,27 +14,27 @@
       </div>
       <ul class="sidebar-menu">
         <li>
-          <router-link to="/AddCategory" class="menu-item">
+          <router-link to="/CategoryVendor" class="menu-item">
             <i class="fas fa-tags"></i>
             <span class="menu-text">Category</span>
           </router-link>
         </li>
         <li>
-          <router-link to="/AddSubCategory" class="menu-item">
+          <router-link to="/SubcategoryVendor" class="menu-item">
             <i class="fas fa-tag"></i>
             <span class="menu-text">Sub Category</span>
           </router-link>
         </li>
         <li>
-          <router-link to="/vendors" class="menu-item">
+          <router-link to="/AddProduct" class="menu-item">
             <i class="fas fa-store"></i>
-            <span class="menu-text">Vendors</span>
+            <span class="menu-text">Product</span>
           </router-link>
         </li>
         <li>
           <router-link to="/products" class="menu-item">
             <i class="fas fa-box-open"></i>
-            <span class="menu-text">Products</span>
+            <span class="menu-text">aa</span>
           </router-link>
         </li>
         <li>

@@ -1,49 +1,7 @@
 <template>
   <div class="container">
-    <SideBar />
+    <SideBarvendor />
     <div class="dashboard">
-      <!-- Form Section -->
-      <div class="category-form">
-        <h2>Manage Sub-Categories</h2>
-        <form @submit.prevent="addSubCategory">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="category_id">Main Category:</label>
-              <select
-                v-model="selectedCategory"
-                id="category_id"
-                required
-                class="custom-select"
-              >
-                <option value="" disabled>Select main category</option>
-                <option
-                  v-for="category in categories"
-                  :key="category.id"
-                  :value="category.id"
-                >
-                  {{ category.title }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="name">Sub-Category Name:</label>
-              <input
-                type="text"
-                id="name"
-                v-model="subCategoryName"
-                required
-                class="custom-input"
-              />
-            </div>
-          </div>
-
-          <button type="submit" class="add-button">
-            <span class="icon">+</span> Add Sub-Category
-          </button>
-        </form>
-      </div>
-
       <!-- Table Section -->
       <div class="data-table">
         <div class="table-header">
@@ -67,7 +25,6 @@
                 <th>Name</th>
                 <th>Main Category</th>
                 <th>Created At</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -75,52 +32,13 @@
                 <td>{{ index + 1 }}</td>
                 <td>
                   <span v-if="!sub.editing">{{ sub.name }}</span>
-                  <input
-                    v-else
-                    v-model="sub.editName"
-                    type="text"
-                    class="edit-input"
-                  />
                 </td>
                 <td>
                   <span v-if="!sub.editing">
                     {{ getCategoryName(sub.category_id) }}
                   </span>
-                  <select
-                    v-else
-                    v-model="sub.editCategoryId"
-                    class="edit-select"
-                  >
-                    <option
-                      v-for="cat in categories"
-                      :key="cat.id"
-                      :value="cat.id"
-                    >
-                      {{ cat.title }}
-                    </option>
-                  </select>
                 </td>
                 <td>{{ formatDate(sub.created_at) }}</td>
-                <td>
-                  <div class="action-buttons">
-                    <template v-if="!sub.editing">
-                      <button class="edit-btn" @click="startEditing(sub)">
-                        ✏️
-                      </button>
-                      <button class="delete-btn" @click="confirmDelete(sub.id)">
-                        🗑️
-                      </button>
-                    </template>
-                    <template v-else>
-                      <button class="save-btn" @click="saveChanges(sub)">
-                        ✔️
-                      </button>
-                      <button class="cancel-btn" @click="cancelEditing(sub)">
-                        ✖️
-                      </button>
-                    </template>
-                  </div>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -132,14 +50,14 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData, postData, putData, deleteData } from "@/api";
+import { getData } from "@/api";
 import { useToast } from "vue-toastification";
+import SideBarvendor from "@/components/SideBarvendor.vue";
 
 export default {
-  name: "AddSubCategory",
+  name: "SubcategoryVendor",
   components: {
-    SideBar,
+    SideBarvendor,
   },
   data() {
     return {
@@ -169,7 +87,7 @@ export default {
       try {
         const token = localStorage.getItem("access_token");
         const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/admin/categories/get_all", headers);
+        const response = await getData("/vendor/categories/get_all", headers);
         this.categories = response;
       } catch (error) {
         this.toast.error("Failed to load main categories");
@@ -183,7 +101,7 @@ export default {
       try {
         const token = localStorage.getItem("access_token");
         const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/admin/subcategories/getall", headers);
+        const response = await getData("/vendor/subcategories/getall", headers);
         this.subCategories = response.map((sub) => ({
           ...sub,
           editing: false,
@@ -198,76 +116,13 @@ export default {
       }
     },
 
-    async addSubCategory() {
-      try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-
-        await postData(
-          "/admin/subcategories/store",
-          {
-            category_id: this.selectedCategory,
-            name: this.subCategoryName,
-          },
-          headers
-        );
-
-        this.toast.success("Added successfully");
-        this.subCategoryName = "";
-        this.selectedCategory = "";
-        await this.fetchSubCategories();
-      } catch (error) {
-        this.toast.error("Addition failed");
-        console.error(error);
-      }
-    },
-
-    startEditing(sub) {
-      sub.editing = true;
-    },
-
-    cancelEditing(sub) {
-      sub.editing = false;
-      sub.editName = sub.name;
-      sub.editCategoryId = sub.category_id;
-    },
-
-    async saveChanges(sub) {
-      try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // تحويل القيم إلى النوع المطلوب
-        const payload = {
-          category_id: String(sub.editCategoryId), // تحويل إلى string
-          name: sub.editName,
-        };
-
-        // إضافة category_id كمعلمة في الرابط
-        await putData(
-          `/admin/subcategories/update/${sub.id}?category_id=${payload.category_id}`,
-          payload,
-          headers
-        );
-
-        sub.name = sub.editName;
-        sub.category_id = sub.editCategoryId;
-        sub.editing = false;
-        this.toast.success("تم التحديث بنجاح");
-      } catch (error) {
-        this.toast.error("فشل في التحديث");
-        console.error(error);
-      }
-    },
-
-    // تعديل دالة الجلب لتحويل القيم إلى strings
     async FetchSubCategories() {
       this.loading = true;
       this.error = null;
       try {
         const token = localStorage.getItem("access_token");
         const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/admin/subcategories/getall", headers);
+        const response = await getData("/vendor/subcategories/getall", headers);
 
         this.subCategories = response.map((sub) => ({
           ...sub,
@@ -280,31 +135,6 @@ export default {
         console.error(error);
       } finally {
         this.loading = false;
-      }
-    },
-
-    async confirmDelete(id) {
-      if (!confirm("Are you sure you want to delete?")) return;
-
-      try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // الحصول على الـ category_id من البيانات المحلية
-        const subCategory = this.subCategories.find((sub) => sub.id === id);
-
-        await deleteData(
-          `/admin/subcategories/delete/${id}?category_id=${String(
-            subCategory.category_id
-          )}`,
-          headers
-        );
-
-        this.toast.success("Deleted successfully");
-        await this.FetchSubCategories();
-      } catch (error) {
-        this.toast.error("Deletion failed");
-        console.error(error);
       }
     },
 
