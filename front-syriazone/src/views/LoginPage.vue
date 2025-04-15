@@ -62,19 +62,29 @@ export default {
       try {
         const response = await postData("/api/login", userData);
         console.log(response);
-        if (response.status == 200)
-          if (response.data.access_token.original.user_type == "Admin") {
-            window.localStorage.setItem(
-              "access_token",
-              response.data.access_token.original.token
-            );
-            window.localStorage.setItem(
-              "user_type",
-              response.data.access_token.original.user_type
-            );
-
-            this.$router.push("/AdminPage");
-          }
+        if (response.access_token.original.user_type == "Admin") {
+          window.localStorage.setItem(
+            "access_token",
+            response.access_token.original.token
+          );
+          window.localStorage.setItem(
+            "user_type",
+            response.access_token.original.user_type
+          );
+          console.log("sss");
+          this.$router.push("/AdminPage");
+        }
+        if (response.access_token.original.user_type == "Vendor") {
+          window.localStorage.setItem(
+            "access_token",
+            response.access_token.original.token
+          );
+          window.localStorage.setItem(
+            "user_type",
+            response.access_token.original.user_type
+          );
+          this.$router.push("/Vendorlogin");
+        }
       } catch (error) {
         console.error("Error posting data:", error);
       }

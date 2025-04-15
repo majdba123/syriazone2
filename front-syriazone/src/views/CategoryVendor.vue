@@ -1,39 +1,7 @@
 <template>
   <div class="container">
-    <SideBar />
+    <SideBarvendor />
     <div class="dashboard">
-      <!-- Form Section -->
-      <div class="category-form">
-        <h2>Manage Categories</h2>
-        <form @submit.prevent="addCategory">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="title">Title:</label>
-              <input
-                id="title"
-                v-model="title"
-                type="text"
-                required
-                class="custom-input"
-              />
-            </div>
-            <div class="form-group">
-              <label for="percent">Percent:</label>
-              <input
-                id="percent"
-                v-model="percent"
-                type="number"
-                required
-                class="custom-input"
-              />
-            </div>
-          </div>
-          <button type="submit" class="add-button">
-            <span class="icon">+</span> Add Category
-          </button>
-        </form>
-      </div>
-
       <!-- Table Section -->
       <div class="data-table">
         <div class="table-header">
@@ -57,7 +25,6 @@
                 <th>Title</th>
                 <th>Percent</th>
                 <th>Sub Categories</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -65,22 +32,8 @@
                 <td>{{ index + 1 }}</td>
 
                 <td v-if="!category.editing">{{ category.title }}</td>
-                <td v-else>
-                  <input
-                    v-model="category.editTitle"
-                    type="text"
-                    class="custom-input"
-                  />
-                </td>
 
                 <td v-if="!category.editing">{{ category.percent }}</td>
-                <td v-else>
-                  <input
-                    v-model="category.editPercent"
-                    type="number"
-                    class="custom-input"
-                  />
-                </td>
 
                 <td>
                   <div class="sub-categories">
@@ -95,32 +48,7 @@
                   </div>
                 </td>
 
-                <td>
-                  <div class="action-buttons">
-                    <template v-if="!category.editing">
-                      <button class="edit-btn" @click="enableEditing(category)">
-                        ✏️
-                      </button>
-                      <button
-                        class="delete-btn"
-                        @click="deleteCategory(category.id)"
-                      >
-                        🗑️
-                      </button>
-                    </template>
-                    <template v-else>
-                      <button class="save-btn" @click="saveChanges(category)">
-                        ✔️
-                      </button>
-                      <button
-                        class="cancel-btn"
-                        @click="cancelEditing(category)"
-                      >
-                        ✖️
-                      </button>
-                    </template>
-                  </div>
-                </td>
+                <td></td>
               </tr>
             </tbody>
           </table>
@@ -132,14 +60,14 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData, postData, putData, deleteData } from "@/api";
+import { getData } from "@/api";
 import { useToast } from "vue-toastification";
+import SideBarvendor from "@/components/SideBarvendor.vue";
 
 export default {
-  name: "AddCategory",
+  name: "CategoryVendor",
   components: {
-    SideBar,
+    SideBarvendor,
   },
   setup() {
     const toast = useToast();
@@ -166,7 +94,7 @@ export default {
       const headers = { Authorization: `Bearer ${token}` };
 
       try {
-        const response = await getData("/admin/categories/get_all", headers);
+        const response = await getData("/vendor/categories/get_all", headers);
         this.categories = response.map((cat) => ({
           ...cat,
           editing: false,
@@ -178,86 +106,6 @@ export default {
         console.error("Error fetching categories:", error);
       } finally {
         this.loading = false;
-      }
-    },
-
-    async addCategory() {
-      const token = window.localStorage.getItem("access_token");
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-
-      try {
-        await postData(
-          "/admin/categories/store",
-          {
-            title: this.title,
-            percent: this.percent,
-          },
-          headers
-        );
-
-        this.toast.success("Category added successfully");
-        this.title = "";
-        this.percent = "";
-        await this.fetchCategories();
-      } catch (error) {
-        this.toast.error("Failed to add category");
-        console.error("Error adding category:", error);
-      }
-    },
-
-    enableEditing(category) {
-      category.editing = true;
-    },
-
-    cancelEditing(category) {
-      category.editing = false;
-      category.editTitle = category.title;
-      category.editPercent = category.percent;
-    },
-
-    async saveChanges(category) {
-      const token = window.localStorage.getItem("access_token");
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-
-      try {
-        await putData(
-          `/admin/categories/update/${category.id}`,
-          {
-            title: category.editTitle,
-            percent: category.editPercent,
-          },
-          headers
-        );
-
-        this.toast.success("Category updated successfully");
-        category.title = category.editTitle;
-        category.percent = category.editPercent;
-        category.editing = false;
-      } catch (error) {
-        this.toast.error("Failed to update category");
-        console.error("Error updating category:", error);
-      }
-    },
-
-    async deleteCategory(id) {
-      if (!confirm("Are you sure you want to delete this category?")) return;
-
-      const token = window.localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
-
-      try {
-        await deleteData(`/admin/categories/delete/${id}`, headers);
-        this.toast.success("Category deleted successfully");
-        await this.fetchCategories();
-      } catch (error) {
-        this.toast.error("Failed to delete category");
-        console.error("Error deleting category:", error);
       }
     },
   },
