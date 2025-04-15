@@ -33,10 +33,10 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
         Route::get('get_all', [CategoryController::class, 'index']);
         Route::get('show/{id}', [CategoryController::class, 'show']);
         Route::post('select_category', [CategoryVendorController::class, 'store']);
-
     });
 
     Route::prefix('subcategories')->group(function () {
+        Route::get('/getall_subcategory', [SubCategortController::class, 'index']); // عرض جميع الفئات الفرعية
         Route::get('get_by_category/{category_id}/', [SubCategortController::class, 'get_by_category']); // عرض جميع الفئات الفرعية
         Route::get('show/{id}', [SubCategortController::class, 'show']); // عرض الفئة الفرعية حسب ID
 
@@ -48,7 +48,6 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
         Route::post('store', [ProductController::class, 'store']);
         Route::post('update/{product_id}', [ProductController::class, 'update']);
         Route::delete('delete/{product_id}', [ProductController::class, 'destroy']);
-
     });
 
 
@@ -58,15 +57,11 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
         Route::get('get_all_by_status', [VendorController::class, 'getVendorOrdersByStatus']);
         Route::get('/get_all_by_produt_id/{product_id}', [VendorController::class, 'getOrdersByProductId']);
         Route::get('/get_all_by_user_id/{user_id}', [VendorController::class, 'getVendorOrdersByOrderProductStatus']);
-
     });
 
 
     Route::prefix('commissions')->group(function () {
         Route::get('calculate', [CommissionController::class, 'getVendorCommission']);
         Route::get('calculate/Product/{poduct_id}', [CommissionController::class, 'calculateByProduct']);
-
     });
-
-
 });
