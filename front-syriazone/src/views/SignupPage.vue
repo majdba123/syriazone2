@@ -2,7 +2,7 @@
   <div class="signup">
     <div class="signup-container">
       <div class="logo">
-        <img src="/path/to/logo.png" alt="SyriaZone Logo" />
+        <img src="@/assets/logo.webp" alt="SyriaZone Logo" />
       </div>
       <h2>Create Account</h2>
       <form @submit.prevent="handleSubmit">
@@ -128,7 +128,11 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f1f1f1;
+  background-image: url("@/assets/background.webp"); /* ضع رابط الخلفية هنا */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 20px;
 }
 .social-signup {
   display: flex;
@@ -160,15 +164,17 @@ export default {
 }
 
 .signup-container {
-  background-color: white;
+  background-color: rgba(218, 196, 196, 0.451); /* شبه شفاف لتظهر الخلفية */
   padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 400px;
+  backdrop-filter: blur(5px);
 }
 
 .logo img {
+  border-radius: 100%;
   width: 120px;
   margin-bottom: 20px;
 }

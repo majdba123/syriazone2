@@ -11,12 +11,24 @@ import ProductSearch from "../views/ProductSearch.vue";
 import CategoryVendor from "../views/CategoryVendor.vue";
 import SubcategoryVendor from "../views/SubcategoryVendor.vue";
 import AddProduct from "../views/AddProduct.vue";
+import OrderMangement from "../views/OrderMangement.vue";
+import VendorStats from "../views/VendorStats.vue";
 
 const routes = [
   {
     path: "/",
     name: "home",
     component: HomeView,
+  },
+  {
+    path: "/VendorStats",
+    name: "VendorStats",
+    component: VendorStats,
+  },
+  {
+    path: "/OrderMangement",
+    name: "OrderMangement",
+    component: OrderMangement,
   },
   {
     path: "/SubcategoryVendor",

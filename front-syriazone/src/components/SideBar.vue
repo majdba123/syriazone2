@@ -38,9 +38,15 @@
           </router-link>
         </li>
         <li>
-          <router-link to="/orders" class="menu-item">
+          <router-link to="/OrderMangement" class="menu-item">
             <i class="fas fa-shopping-cart"></i>
             <span class="menu-text">Orders</span>
+          </router-link>
+        </li>
+        <li>
+          <router-link to="/VendorStats" class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            <span class="menu-text">Vendor Stats</span>
           </router-link>
         </li>
         <li>
