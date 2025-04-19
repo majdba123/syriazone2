@@ -18,6 +18,10 @@ class StoreSubCategoryRequest extends FormRequest
         return [
             'category_id' => 'required|exists:categories,id', // التحقق من وجود الفئة
             'name' => 'required|string|max:255', // التحقق من الاسم
+            'attributes' => 'required|array|min:1',
+            'attributes.*.name' => 'required|string|max:255',
+
+
         ];
     }
 
@@ -25,9 +29,15 @@ class StoreSubCategoryRequest extends FormRequest
     {
         return [
             'category_id.required' => 'The category_id field is required.',
-            'category_id.exists' => 'The category_id must be a string.',
+            'category_id.exists' => 'The category_id must be a exists.',
             'name.max' => 'The name may not be greater than 255 characters.',
             'name.required' => 'The name field is required.',
+            'attributes.required' => 'At least one attribute is required.',
+            'attributes.array' => 'Attributes must be an array.',
+            'attributes.min' => 'At least one attribute is required.',
+            'attributes.*.name.required' => 'Each attribute name is required.',
+            'attributes.*.name.string' => 'Each attribute name must be a string.',
+            'attributes.*.name.max' => 'Each attribute name may not be greater than 255 characters.',
         ];
     }
 
