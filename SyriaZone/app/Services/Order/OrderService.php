@@ -7,36 +7,109 @@ use App\Models\Product;
 use App\Models\Order_Product;
 use Illuminate\Support\Facades\Auth;
 use App\Models\vendor;
+use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
     public function createOrder(array $validatedData)
     {
-        $userId = Auth::id();
-        // إنشاء الطلب
-        $order = Order::create([
-            'user_id' => $userId,
-            'total_price' => 0, // سيتم تحديثه لاحقاً
-            'status' => 'pending', // أو الحالة التي تريدها
-        ]);
+        DB::beginTransaction();
 
-        // حساب سعر المنتجات وإضافتها إلى الطلب
-        $totalPrice = 0;
-        foreach ($validatedData['products'] as $productData) {
-            $product = Product::find($productData['product_id']);
-            $orderProduct = Order_Product::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'quantity' => $productData['quantity'],
-                'total_price' => $product->price * $productData['quantity'],
+        try {
+            $userId = Auth::id();
+
+            // إنشاء الطلب
+            $order = Order::create([
+                'user_id' => $userId,
+                'total_price' => 0,
+                'status' => 'pending',
+
             ]);
-            $totalPrice += $orderProduct->total_price;
+
+            $totalPrice = 0;
+            $orderProductsDetails = [];
+
+            foreach ($validatedData['products'] as $productData) {
+                $product = Product::with(['subcategory.Category', 'discount'])->find($productData['product_id']);
+
+                if (!$product) {
+                    throw new \Exception('المنتج غير موجود: ' . $productData['product_id']);
+                }
+
+                $originalPrice = $product->price;
+                $discountApplied = false;
+                $discountValue = 0;
+                $discountType = null;
+                $productPrice = $originalPrice;
+
+                // تطبيق خصم المنتج المباشر إذا كان موجوداً وفعالاً
+                if ($product->discount && $product->discount->isActive()) {
+                    $discountApplied = true;
+                    $discountValue = $product->discount->value;
+                    $productPrice = $product->discount->calculateDiscountedPrice($originalPrice);
+                    $discountType = 'product';
+                } 
+                // إذا لم يكن هناك خصم على المنتج مباشرة، نتحقق من الخصومات على الفئة أو التصنيف الفرعي
+                else {
+                    $bestOffer = $product->getBestApplicableDiscount();
+                    if ($bestOffer) {
+                        $discountApplied = true;
+                        $discountValue = $bestOffer->discount_percentage;
+                        $productPrice = $bestOffer->applyOffer($originalPrice);
+                        $discountType = $bestOffer->offerable_type;
+                    }
+                }
+
+                $orderProduct = Order_Product::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $productData['quantity'],
+                    'total_price' => $productPrice * $productData['quantity'],
+                    'status' => 'pending',
+                ]);
+
+                $totalPrice += $orderProduct->total_price;
+
+                $orderProductsDetails[] = [
+                    'id' => $orderProduct->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'quantity' => $productData['quantity'],
+                    'original_unit_price' => $originalPrice,
+                    'final_unit_price' => $productPrice,
+                    'discount_applied' => $discountApplied,
+                    'discount_value' => $discountValue,
+                    'discount_type' => $discountType,
+                    'total_price' => $productPrice * $productData['quantity'],
+                ];
+            }
+
+            $order->update(['total_price' => $totalPrice]);
+
+            $responseData = [
+                'success' => true,
+                'order' => [
+                    'id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'total_price' => $order->total_price,
+                    'status' => $order->status,
+                    'created_at' => $order->created_at,
+                    'products' => $orderProductsDetails,
+                ],
+                'message' => 'تم إنشاء الطلب بنجاح',
+            ];
+
+            DB::commit();
+
+            return response()->json($responseData);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'فشل في إنشاء الطلب: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // تحديث سعر الطلب الكلي
-        $order->update(['total_price' => $totalPrice]);
-
-        return $order;
     }
 
     public function groupProductsByVendor(array $orderData)

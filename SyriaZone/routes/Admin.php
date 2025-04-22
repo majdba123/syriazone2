@@ -9,6 +9,7 @@ use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\VendorProfileController;
+use App\Http\Controllers\AdminOfferController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,7 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::post('store', [SubCategortController::class, 'store']); // إضافة فئة فرعية جديدة
         Route::put('update/{id}', [SubCategortController::class, 'update']); // تعديل الفئة الفرعية حسب ID
         Route::delete('delete/{id}', [SubCategortController::class, 'destroy']); // حذف الفئة الفرعية حسب ID
+        Route::get('getSubCategory_Attributes/{subCategoryId}', [SubCategortController::class, 'getSubCategoryAttributes']);
     });
 
 
@@ -45,8 +47,6 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::get('/get_by_status', [AdminController::class, 'getVendorsByStatus']);
         Route::get('/show_info/{vendor_id}', [AdminController::class, 'getVendorInfo']);
         Route::get('get_statical_commission/{vendor_id}', [VendorProfileController::class, 'VendorDashboard']);
-
-
     });
 
 
@@ -56,29 +56,36 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::get('/subcategory/{subCategoryId}', [ProductController::class, 'getProductsBySubCategory']);
         Route::get('/search', [ProductController::class, 'searchProducts']);
         Route::get('/vendor/{vendorId}', [ProductController::class, 'getProductsByVendor']);
-
-        });
+    });
 
 
     Route::prefix('orders')->group(function () {
 
-            Route::get('get_all/ByVendor/{id}', [VendorController::class, 'getVendorOrders']);
-            Route::get('get_all_by_status', [AdminController::class, 'getOrdersByStatus']);
-            Route::get('get_all_by_price', [AdminController::class, 'getOrdersByPriceRange']);
-            Route::get('/get_all_by_produt_id/{product_id}', [AdminController::class, 'getOrdersByProduct']);
-            Route::get('/get_all_by_user_id/{user_id}', [AdminController::class, 'getOrdersByUser']);
-            Route::get('/get_all_by_category/{category_id}', [AdminController::class, 'getOrdersByCategory']);
-            Route::get('/get_all_by_sub_category/{sub_category_id}', [AdminController::class, 'getOrdersBySubCategory']);
-
-        });
+        Route::get('get_all/ByVendor/{id}', [VendorController::class, 'getVendorOrders']);
+        Route::get('get_all_by_status', [AdminController::class, 'getOrdersByStatus']);
+        Route::get('get_all_by_price', [AdminController::class, 'getOrdersByPriceRange']);
+        Route::get('/get_all_by_produt_id/{product_id}', [AdminController::class, 'getOrdersByProduct']);
+        Route::get('/get_all_by_user_id/{user_id}', [AdminController::class, 'getOrdersByUser']);
+        Route::get('/get_all_by_category/{category_id}', [AdminController::class, 'getOrdersByCategory']);
+        Route::get('/get_all_by_sub_category/{sub_category_id}', [AdminController::class, 'getOrdersBySubCategory']);
+    });
 
 
     Route::prefix('commissions')->group(function () {
-            Route::get('calculate/{vendor_id}', [CommissionController::class, 'getVendorCommission']);
-            Route::get('calculate/Vendor_Product/{poduct_id}', [CommissionController::class, 'calculateByProduct']);
+        Route::get('calculate/{vendor_id}', [CommissionController::class, 'getVendorCommission']);
+        Route::get('calculate/Vendor_Product/{poduct_id}', [CommissionController::class, 'calculateByProduct']);
+    });
 
+    /*
+        Route::prefix('admin/offers')->group(function () {
+            Route::post('store/', [AdminOfferController::class, 'store']);
+            Route::put('update/{id}', [AdminOfferController::class, 'update']);
+            Route::delete('delete/{id}', [AdminOfferController::class, 'destroy']);
+            Route::get('index/', [AdminOfferController::class, 'index']);
+            Route::get('show/{id}', [AdminOfferController::class, 'show']);
+            Route::get('by-category/{category_id}', [AdminOfferController::class, 'getOffersByCategory']);
+            Route::get('by-subcategory/{subcategory_id}', [AdminOfferController::class, 'getOffersBySubCategory']);
         });
 
-
-
+    */
 });

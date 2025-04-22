@@ -23,4 +23,9 @@ class Category extends Model
         return $this->hasMany(Category_Vendor::class);
     }
 
+    public function adminOffers()
+    {
+        return $this->morphMany(AdminOffer::class, 'offerable');
+    }
+
 }

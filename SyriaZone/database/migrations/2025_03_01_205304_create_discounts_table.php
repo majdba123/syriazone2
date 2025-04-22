@@ -17,8 +17,11 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(vendor::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('status')->default('pending');
-            $table->string('percent');
+            $table->string('status')->default('active'); // Status of the discount (e.g., active, inactive)
+            $table->string('fromtime'); // Start time of the discount
+            $table->string('totime'); // End time of the discount
+            $table->decimal('value', 10, 2); // Discount value (e.g., percentage or fixed amount)
+            $table->timestamps(); // Created at and updated at
             $table->timestamps();
         });
     }

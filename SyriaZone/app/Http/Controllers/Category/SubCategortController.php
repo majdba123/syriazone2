@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Requests\SubCategory\StoreSubCategoryRequest;
 use App\Http\Requests\SubCategory\UpdateSubCategoryRequest;
+use App\Models\Sub_Categort;
 use App\Services\SubCategory\SubCategoryService;
 use Illuminate\Http\JsonResponse;
 
@@ -53,5 +54,22 @@ class SubCategortController extends Controller
     {
         $sub_category = $this->subcategoryService->get_by_category_id($categor_id);
         return response()->json($sub_category);
+    }
+
+
+    public function getSubCategoryAttributes($subCategoryId)
+    {
+        $subCategory = Sub_Categort::with('attribute')->findOrFail($subCategoryId);
+
+        return response()->json([
+            'sub_category' => $subCategory->name,
+            'attributes' => $subCategory->attribute->map(function($attr) {
+                return [
+                    'id' => $attr->id,
+                    'name' => $attr->name,
+                    'sub_category_id' => $attr->sub_category_id
+                ];
+            })
+        ]);
     }
 }

@@ -21,4 +21,15 @@ class Sub_Categort extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function attribute()
+    {
+        return $this->hasMany(Attribute::class);
+    }
+
+    public function adminOffers()
+    {
+        return $this->morphMany(AdminOffer::class, 'offerable');
+    }
+
 }
