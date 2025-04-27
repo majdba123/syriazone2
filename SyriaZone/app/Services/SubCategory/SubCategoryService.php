@@ -25,7 +25,7 @@ class SubCategoryService
             foreach ($data['attributes'] as $attributeData) {
                 $subcategory->attribute()->create([
                     'name' => $attributeData['name'],
-                    'sub_category_id' => $subcategory->id
+                    'sub__categort_id' => $subcategory->id
                 ]);
             }
         }

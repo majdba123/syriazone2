@@ -2,6 +2,7 @@
 
 namespace App\Services\Order;
 
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Order_Product;
@@ -17,13 +18,26 @@ class OrderService
 
         try {
             $userId = Auth::id();
+            $couponCode = $validatedData['coupon_code'] ?? null;
+            $coupon = null;
+            $couponDiscount = 0;
+            $originalTotalPrice = 0;
+            $couponApplied = false;
+
+            // التحقق من صحة الكوبون إذا تم تقديمه
+            if ($couponCode) {
+                $coupon = Coupon::where('code', $couponCode)->first();
+
+                if (!$coupon || !$coupon->isActive()) {
+                    throw new \Exception('كود الخصم غير صالح أو منتهي الصلاحية');
+                }
+            }
 
             // إنشاء الطلب
             $order = Order::create([
                 'user_id' => $userId,
                 'total_price' => 0,
                 'status' => 'pending',
-
             ]);
 
             $totalPrice = 0;
@@ -48,7 +62,7 @@ class OrderService
                     $discountValue = $product->discount->value;
                     $productPrice = $product->discount->calculateDiscountedPrice($originalPrice);
                     $discountType = 'product';
-                } 
+                }
                 // إذا لم يكن هناك خصم على المنتج مباشرة، نتحقق من الخصومات على الفئة أو التصنيف الفرعي
                 else {
                     $bestOffer = $product->getBestApplicableDiscount();
@@ -84,6 +98,21 @@ class OrderService
                 ];
             }
 
+            // حفظ السعر الأصلي قبل تطبيق الكوبون
+            $originalTotalPrice = $totalPrice;
+
+            // تطبيق خصم الكوبون إذا كان صالحاً
+            if ($coupon) {
+                $couponDiscount = $totalPrice * ($coupon->discount_percent / 100);
+                $totalPrice -= $couponDiscount;
+                $couponApplied = true;
+
+                // ربط الكوبون بالطلب
+                $order->coupons()->attach($coupon, [
+                    'discount_amount' => $couponDiscount
+                ]);
+            }
+
             $order->update(['total_price' => $totalPrice]);
 
             $responseData = [
@@ -91,7 +120,12 @@ class OrderService
                 'order' => [
                     'id' => $order->id,
                     'user_id' => $order->user_id,
+                    'original_total_price' => $originalTotalPrice,
                     'total_price' => $order->total_price,
+                    'coupon_applied' => $couponApplied,
+                    'coupon_discount' => $couponDiscount,
+                    'coupon_code' => $coupon ? $coupon->code : null,
+                    'coupon_discount_percent' => $coupon ? $coupon->discount_percent : null,
                     'status' => $order->status,
                     'created_at' => $order->created_at,
                     'products' => $orderProductsDetails,
@@ -153,7 +187,7 @@ class OrderService
     public function getOrdersByPriceRange($minPrice, $maxPrice)
     {
         $orders = Order::whereBetween('total_price', [$minPrice, $maxPrice])
-            ->with(['order_product:id,order_id,product_id', 'order_product.Product:id,name'])
+            ->with(['order_product:id,order_id,product_id', 'order_product.Product:id,name','coupons'])
             ->paginate(8); // تحديد عدد الطلبات في كل صفحة (10 طلبات)
 
         return response()->json(['orders' => $orders], 200);
@@ -161,7 +195,7 @@ class OrderService
 
     public function getAllOrders()
     {
-        return Order::with(['order_product:id,order_id,product_id', 'order_product.Product:id,name'])
+        return Order::with(['order_product:id,order_id,product_id', 'order_product.Product:id,name','coupons'])
             ->paginate(8); // تقسيم الطلبات إلى صفحات
     }
 
@@ -174,7 +208,7 @@ class OrderService
         }
 
         return Order::where('status', $status)
-            ->with(['order_product:id,order_id,product_id', 'order_product.Product:id,name'])
+            ->with(['order_product:id,order_id,product_id', 'order_product.Product:id,name','coupons'])
             ->paginate(8); // تقسيم الطلبات إلى صفحات
     }
 
@@ -184,7 +218,7 @@ class OrderService
     public function getOrdersByProduct($productId)
     {
         $orders = Order_Product::where('product_id', $productId)
-            ->with(['order:id,status,total_price,user_id', 'order.user:id,name,email'])
+            ->with(['order:id,status,total_price,user_id', 'order.user:id,name,email','coupons'])
             ->paginate(8); // تحديد عدد الطلبات في كل صفحة (10 طلبات)
 
         return $orders;
@@ -193,7 +227,7 @@ class OrderService
     public function getOrdersByUser($userId)
     {
         $orders = Order::where('user_id', $userId)
-            ->with(['order_product:id,order_id,product_id,status,total_price', 'order_product.product:id,name,price'])
+            ->with(['order_product:id,order_id,product_id,status,total_price', 'order_product.product:id,name,price','coupons'])
             ->paginate(8); // تحديد عدد الطلبات في كل صفحة (10 طلبات)
 
         return $orders;

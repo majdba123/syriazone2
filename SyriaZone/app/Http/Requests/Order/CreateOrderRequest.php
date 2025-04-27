@@ -19,6 +19,7 @@ class CreateOrderRequest extends FormRequest
             'products' => 'required|array',
             'products.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'products.*.quantity' => 'required|integer|min:1',
+            'coupon_code' => 'nullable|string|exists:coupons,code',
         ];
     }
 
@@ -32,6 +33,8 @@ class CreateOrderRequest extends FormRequest
             'products.*.quantity.required' => 'Each product must have a quantity.',
             'products.*.quantity.integer' => 'The quantity must be an integer.',
             'products.*.quantity.min' => 'The quantity must be at least 1.',
+            'coupon_code.exists' => 'كود الخصم غير صالح',
+
         ];
     }
 

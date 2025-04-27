@@ -5,11 +5,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Category\SubCategortController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CouponController;
+
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\AdminOfferController;
+use App\Http\Controllers\Product\RatingController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -88,4 +93,25 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         });
 
     */
+    Route::prefix('rate')->group(function () {
+        Route::get('/product/{product_id}', [RatingController::class, 'getRateProduct']);
+        Route::delete('/delete/{rate_id}', [RatingController::class, 'admin_delete_rate']);
+        Route::delete('answer/delete/{answer_id}', [RatingController::class, 'admin_delete_answer']);
+
+    });
+
+
+    Route::prefix('coupons')->group(function () {
+        Route::get('index/', [CouponController::class, 'index']);
+        Route::post('store/', [CouponController::class, 'store']);
+        Route::get('show/{coupon}', [CouponController::class, 'show']);
+        Route::put('update/{coupon}', [CouponController::class, 'update']);
+        Route::patch('update_status/{coupon}', [CouponController::class, 'update_status']);
+        Route::delete('delete/{coupon}', [CouponController::class, 'destroy']);
+    });
+
+
+
+
+
 });

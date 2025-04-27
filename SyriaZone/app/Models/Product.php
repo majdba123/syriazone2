@@ -52,7 +52,7 @@ class Product extends Model
     }
 
 
-    
+
     public function ProductAttr()
     {
         return $this->hasMany(ProductAttr::class);
@@ -111,17 +111,17 @@ class Product extends Model
     {
         // أولاً نتحقق من وجود خصم على التصنيف الفرعي
         $subCategoryOffer = $this->getActiveSubCategoryOffers()->first();
-        
+
         // ثم نتحقق من وجود خصم على الفئة الرئيسية
         $categoryOffer = $this->getActiveCategoryOffers()->first();
-        
+
         // نرجع الخصم الأعلى قيمة
         if ($subCategoryOffer && $categoryOffer) {
-            return $subCategoryOffer->discount_percentage > $categoryOffer->discount_percentage 
-                ? $subCategoryOffer 
+            return $subCategoryOffer->discount_percentage > $categoryOffer->discount_percentage
+                ? $subCategoryOffer
                 : $categoryOffer;
         }
-        
+
         return $subCategoryOffer ?: $categoryOffer;
     }
 
@@ -129,11 +129,11 @@ class Product extends Model
     {
         $originalPrice = $this->price;
         $bestOffer = $this->getBestApplicableDiscount();
-        
+
         if ($bestOffer) {
             return $bestOffer->applyOffer($originalPrice);
         }
-        
+
         return $originalPrice;
     }
 

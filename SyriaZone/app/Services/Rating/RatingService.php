@@ -59,14 +59,14 @@ class RatingService
     {
         $userId = Auth::id();
         // استرجاع جميع التقييمات للمستخدم المصادق عليه
-        $ratings = Rating::where('user_id', $userId)->get();
+        $ratings = Rating::where('user_id', $userId)->with('answer_rating')->get();
 
         return $ratings;
     }
 
     public function GetAllRateProduct($product_id)
     {
-        $ratings = Rating::where('product_id', $product_id)->get();
+        $ratings = Rating::where('product_id', $product_id)->with('answer_rating')->get();
 
         return $ratings;
     }

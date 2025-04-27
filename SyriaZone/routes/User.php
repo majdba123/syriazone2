@@ -8,6 +8,7 @@ use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Category\SubCategortController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Product\RatingController;
+use App\Http\Controllers\Vendor\AnswerRatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,13 +60,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/get_product/{order_id}', [OrderController::class, 'getProductOrder']);
         });
 
-        
+
     Route::get('/rate/get_all', [RatingController::class, 'getUserRatings']);
     Route::post('/rate/store/{Product_id}', [RatingController::class, 'rateProduct']);
     Route::put('/rate/update/{Rate_id}', [RatingController::class, 'Update']);
     Route::delete('/rate/delete/{Rate_id}', [RatingController::class, 'destroy']);
     Route::get('/product/rating/{product_id}', [RatingController::class, 'getRateProduct']);
-
 
 
 

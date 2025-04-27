@@ -15,9 +15,11 @@ return new class extends Migration
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('token');
-            $table->string('percent');
-            $table->string('status');
+            $table->string('code');
+            $table->string('discount_percent');
+            $table->string('status')->default('active');
+            $table->string('expires_at');
+
             $table->timestamps();
         });
     }

@@ -13,9 +13,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('answer__ratings', function (Blueprint $table) {
+            $table->id();
             $table->foreignIdFor(Rating::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('comment');
+            $table->timestamps();
+
         });
     }
 

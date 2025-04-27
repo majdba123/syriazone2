@@ -52,9 +52,11 @@ class OrderController extends Controller
         $status = $request->status;
 
         if ($status === 'all') {
-            $orders = Order::where('user_id', $user->id)->get();
+            $orders = Order::where('user_id', $user->id)->with('order_product.Product','coupons')->get();
+
         } else {
             $orders = Order::where('user_id', $user->id)
+            ->with('order_product.Product','coupons')
                             ->where('status', $status)
                             ->get();
         }
@@ -70,7 +72,7 @@ class OrderController extends Controller
         // جلب الطلب والتحقق من أن المستخدم هو صاحب الطلب
         $order = Order::where('id', $order_id)
                       ->where('user_id', $user->id)
-                      ->with('order_product.Product')
+                      ->with('order_product.Product','coupons')
                       ->first();
 
         if (!$order) {

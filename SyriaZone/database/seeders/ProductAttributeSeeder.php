@@ -24,7 +24,7 @@ class ProductAttributeSeeder extends Seeder
 
         foreach ($products as $product) {
             // الحصول على خصائص الفئة الفرعية لهذا المنتج
-            $attributes = Attribute::where('sub_category_id', $product->sub_category_id)->get();
+            $attributes = Attribute::where('sub__categort_id', $product->sub__categort_id)->get();
 
             foreach ($attributes as $attribute) {
                 // إنشاء قيمة عشوائية للخاصية بناءً على نوعها
