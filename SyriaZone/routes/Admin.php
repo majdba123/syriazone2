@@ -26,6 +26,7 @@ use App\Http\Controllers\Product\RatingController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('dashboard', [AdminController::class, 'adminDashboard']);
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('categories/get_all', [CategoryController::class, 'index']);
@@ -52,6 +53,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::get('/get_by_status', [AdminController::class, 'getVendorsByStatus']);
         Route::get('/show_info/{vendor_id}', [AdminController::class, 'getVendorInfo']);
         Route::get('get_statical_commission/{vendor_id}', [VendorProfileController::class, 'VendorDashboard']);
+        Route::get('get_dashboard_vendor/{vendor_id}', [AdminController::class, 'VendorDashboard']);
+
     });
 
 

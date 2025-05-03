@@ -5,21 +5,27 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Vendor\CreateUserAndVendorRequest;
 use App\Http\Requests\Vendor\UpdateUserAndVendorRequest;
 use App\Models\Product;
+use App\Models\vendor;
 use Illuminate\Http\JsonResponse;
+use App\Services\Vendor\VendorDashboardService;
 
 use App\Services\Vendor\UserVendorService;
 use App\Services\Order\OrderService;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
     protected $service;
     protected $order;
-    public function __construct(UserVendorService $service, OrderService $order)
+    protected $dashboardService;
+
+    public function __construct(UserVendorService $service, OrderService $order,VendorDashboardService $dashboardService)
     {
         $this->service = $service;
         $this->order = $order;
+        $this->dashboardService = $dashboardService;
     }
 
     public function createUserAndVendor(CreateUserAndVendorRequest $request)
@@ -230,6 +236,33 @@ class AdminController extends Controller
     }
 
 
+    // للإدمن
+    public function VendorDashboard( $vendor_id = null)
+    {
 
+        if ($vendor_id==null) {
+            $user = Auth::user();
+            // التحقق من وجود التاجر المرتبط بالمستخدم
+            if (!$user || !$user->vendor) {
+                return response()->json(['error' => 'Vendor not found for the current user.'], 403);
+            }
+            // جلب التاجر المرتبط
+            $vendor = $user->vendor;
+
+        }else{
+            $vendor = vendor::findOrFail($vendor_id);
+        }
+
+        return response()->json($this->dashboardService->getDashboardData($vendor));
+    }
+
+
+
+    public function adminDashboard()
+    {
+        // التحقق من أن المستخدم إ
+
+        return response()->json($this->dashboardService->getDashboardadmin());
+    }
 
 }

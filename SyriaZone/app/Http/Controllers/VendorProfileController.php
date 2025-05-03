@@ -32,7 +32,7 @@ class VendorProfileController extends Controller
             $vendor = $user->vendor;
 
         }else{
-            $vendor = Vendor::findOrFail($vendor_id);
+            $vendor = vendor::findOrFail($vendor_id);
         }
 
         return response()->json($this->dashboardService->getDashboardData($vendor));
