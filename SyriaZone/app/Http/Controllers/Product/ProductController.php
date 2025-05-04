@@ -53,7 +53,7 @@ class ProductController extends Controller
 
             // إنشاء الصورة باستخدام الرابط الكامل
             ImagProduct::create([
-                'product_id' => $product->id,
+                'product_id' => $product['id'],
                 'imag' => $imageUrl,
             ]);
 
@@ -287,8 +287,88 @@ class ProductController extends Controller
         ], 200);
     }
 
+    public function changeProductStatus(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'status' => 'required|in:pending,completed,rejected'
+        ]);
 
+        $product = Product::find($id);
 
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        $product->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product status updated successfully',
+            'data' => $product
+        ]);
+    }
+
+    /**
+     * حذف منتج مع الصور والسمات المرتبطة به
+     */
+    public function deleteProduct($id): JsonResponse
+    {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        // حذف الصور من التخزين
+        foreach ($product->images as $image) {
+            $imagePath = str_replace(asset('storage/'), '', $image->imag);
+            Storage::disk('public')->delete($imagePath);
+        }
+
+        // حذف الصور من قاعدة البيانات
+        $product->images()->delete();
+
+        // حذف السمات
+        $product->ProductAttr()->delete();
+
+        // حذف المنتج نفسه
+        $product->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product and all related data deleted successfully'
+        ]);
+    }
+    public function changeProductStock(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'stock' => 'required|in:out,full' // Only allow 'out' or 'full' status
+        ]);
+
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        // Get the authenticated user
+        $user = auth()->user();
+
+        // Check if user is a vendor and owns the product
+        if (!$user->vendor || $product->vendor_id !== $user->vendor->id) {
+            return response()->json([
+                'message' => 'Unauthorized - You must be the product owner to update stock status'
+            ], 403);
+        }
+
+        $product->update(['stock' => $request->stock]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product stock status updated successfully',
+            'data' => $product
+        ]);
+    }
 
 
 

@@ -50,6 +50,17 @@ class OrderService
                     throw new \Exception('المنتج غير موجود: ' . $productData['product_id']);
                 }
 
+
+                if ($product->stock !== 'full') {
+                    throw new \Exception('المنتج غير متوفر حالياً: ' . $product->name);
+                }
+
+                // Check product status
+                if ($product->status !== 'completed') {
+                    throw new \Exception('المنتج غير متاح للطلب حالياً: ' . $product->name);
+                }
+
+
                 $originalPrice = $product->price;
                 $discountApplied = false;
                 $discountValue = 0;

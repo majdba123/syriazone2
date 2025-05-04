@@ -65,6 +65,10 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::get('/subcategory/{subCategoryId}', [ProductController::class, 'getProductsBySubCategory']);
         Route::get('/search', [ProductController::class, 'searchProducts']);
         Route::get('/vendor/{vendorId}', [ProductController::class, 'getProductsByVendor']);
+        Route::post('/change_status/{produc_id}', [ProductController::class, 'changeProductStatus']);
+        Route::delete('/delete/{produc_id}', [ProductController::class, 'deleteProduct']);
+
+
     });
 
 

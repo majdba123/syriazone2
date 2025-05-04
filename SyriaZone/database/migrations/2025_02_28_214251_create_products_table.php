@@ -23,6 +23,9 @@ return new class extends Migration
                             ->cascadeOnDelete();
                 $table->string('name'); // Name of the product
                 $table->text('discription')->nullable(); // Description of the product
+                $table->text('status')->default('pending'); // Description of the product
+                $table->text('stock')->default('full'); // Description of the product
+
                 $table->decimal('price', 10, 2); // Price of the product
                 $table->timestamps();
         });

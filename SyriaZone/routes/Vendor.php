@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
         Route::post('store', [ProductController::class, 'store']);
         Route::post('update/{product_id}', [ProductController::class, 'update']);
         Route::delete('delete/{product_id}', [ProductController::class, 'destroy']);
+        Route::post('/changeProductStock/{produc_id}', [ProductController::class, 'changeProductStock']);
 
 
 

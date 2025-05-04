@@ -12,7 +12,9 @@ class Product extends Model
         'sub__categort_id',
         'vendor_id',
         'name',
+        'status',
         'discription',
+        'stock',
         'price',
     ];
 
