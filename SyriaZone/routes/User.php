@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ContactController;
 
 use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Product\ProductController;
@@ -75,5 +76,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/update', [UserController::class, 'updateProfile']);
         Route::get('/my_info', [UserController::class, 'getProfile']);
     });
+
+    Route::prefix('contact')->group(function () {
+        Route::post('/store', [ContactController::class, 'store']);
+        Route::get('/my_contact', [ContactController::class, 'myContacts']);
+
+    });
+
 
 });

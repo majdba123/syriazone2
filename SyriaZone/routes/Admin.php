@@ -13,6 +13,7 @@ use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\AdminOfferController;
 use App\Http\Controllers\Product\RatingController;
+use App\Http\Controllers\ContactController;
 
 
 
@@ -115,6 +116,13 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
 
 
+    Route::prefix('contact')->group(function () {
+        Route::post('/store_reply/{contact_id}', [ContactController::class, 'storeReply']);
+        Route::get('/get_all', [ContactController::class, 'allContacts']);
+        Route::delete('delete/{contact_id}', [ContactController::class, 'destroy']);
+
+
+    });
 
 
 });

@@ -12,6 +12,7 @@ use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\Vendor\AnswerRatingController;
 use App\Http\Controllers\Product\RatingController;
+use App\Http\Controllers\ContactController;
 
 use App\Http\Controllers\UserController;
 
@@ -95,5 +96,12 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
     Route::prefix('profile')->group(function () {
         Route::post('/update', [UserController::class, 'updateProfile']);
         Route::get('/my_info', [UserController::class, 'getProfile']);
+    });
+
+
+    Route::prefix('contact')->group(function () {
+        Route::post('/store', [ContactController::class, 'store']);
+        Route::get('/my_contact', [ContactController::class, 'myContacts']);
+
     });
 });
