@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('attributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sub_category_id') // Foreign key referencing sub_categories table
+            $table->foreignId('sub__categort_id') // Foreign key referencing sub_categories table
             ->constrained()
             ->cascadeOnDelete();
             $table->string('name');

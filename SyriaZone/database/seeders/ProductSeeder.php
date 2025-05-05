@@ -19,6 +19,7 @@ class ProductSeeder extends Seeder
             'vendor_id' => 1,
             'name' => 'Product 1',
             'discription' => 'This is a description for Product 1.',
+            'status' => 'completed',
             'price' => 100.00,
         ]);
 
@@ -27,6 +28,8 @@ class ProductSeeder extends Seeder
             'vendor_id' => 1,
             'name' => 'Product 2',
             'discription' => 'This is a description for Product 2.',
+            'status' => 'completed',
+
             'price' => 100.00,
         ]);
 
@@ -35,6 +38,8 @@ class ProductSeeder extends Seeder
             'vendor_id' => 2,
             'name' => 'Product 3',
             'discription' => 'This is a description for Product 2.',
+            'status' => 'completed',
+
             'price' => 150.00,
         ]);
         Product::create([
@@ -42,6 +47,8 @@ class ProductSeeder extends Seeder
             'vendor_id' => 2,
             'name' => 'Product 3',
             'discription' => 'This is a description for Product 2.',
+            'status' => 'completed',
+
             'price' => 150.00,
         ]);
 

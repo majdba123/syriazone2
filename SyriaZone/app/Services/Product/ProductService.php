@@ -11,6 +11,18 @@ use Illuminate\Support\Facades\Log;
 
 class ProductService
 {
+    private function applyUserTypeFilter($query)
+    {
+        $user = Auth::user();
+
+        // إذا كان المستخدم عادي (type = 0) وليس لديه vendor
+        if ($user && $user->type == 0 && !$user->vendor) {
+            $query->where('status', 'completed');
+            $query->where('stock', 'full');
+        }
+
+        return $query;
+    }
     private function formatProductData($product)
     {
         // تحميل جميع العلاقات المطلوبة بشكل صريح
@@ -53,7 +65,9 @@ class ProductService
             'final_price' => $finalPrice,
             'subcategory' => $product->subcategory->name ?? null,
             'subcategory_id' => $product->subcategory->id ?? null,
-            'category' => $product->subcategory->category->name ?? null,
+            'stock' => $product->stock ?? null,
+            'status' => $product->status ?? null,
+            'category' => $product->subcategory->Category->name ?? null,
             'category_id' => $product->subcategory->category->id ?? null,
             'discount_info' => $discountData,
             'images' => $product->images->pluck('imag'),
@@ -67,7 +81,7 @@ class ProductService
             'name' => $data['name'],
             'description' => $data['description'],
             'price' => $data['price'],
-            'sub_category_id' => $data['sub_category_id'],
+            'sub__categort_id' => $data['sub__categort_id'],
             'vendor_id' => $vendor_id,
         ]);
 
@@ -92,7 +106,7 @@ class ProductService
             'name' => $data['name'] ?? $product->name,
             'description' => $data['description'] ?? $product->description,
             'price' => $data['price'] ?? $product->price,
-            'sub_category_id' => $data['sub_category_id'] ?? $product->sub_category_id,
+            'sub__categort_id' => $data['sub__categort_id'] ?? $product->sub__categort_id,
         ]);
 
         if (isset($data['attributes']) && is_array($data['attributes'])) {
@@ -123,9 +137,12 @@ class ProductService
 
     public function getLatestProducts($perPage)
     {
-        return Product::with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage)
+        $query = Product::with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
+            ->orderBy('created_at', 'desc');
+
+        $query = $this->applyUserTypeFilter($query);
+
+        return $query->paginate($perPage)
             ->through(function ($product) {
                 return $this->formatProductData($product);
             });
@@ -133,7 +150,12 @@ class ProductService
 
     public function getProductById($id)
     {
-        $product = Product::with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])->find($id);
+        $query = Product::with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute']);
+
+        $query = $this->applyUserTypeFilter($query);
+
+        $product = $query->find($id);
+
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
@@ -144,6 +166,8 @@ class ProductService
     public function getPaginatedVendorProducts($vendorId, $perPage, $name = null, $category = null, $subcategory = null, $minPrice = 0, $maxPrice = PHP_INT_MAX)
     {
         $query = Product::where('vendor_id', $vendorId);
+
+        $query = $this->applyUserTypeFilter($query);
 
         if (!is_null($name) && !empty($name)) {
             $query->where('name', 'LIKE', "%$name%");
@@ -169,24 +193,30 @@ class ProductService
                 return $this->formatProductData($product);
             });
     }
-
     public function getProductsByCategory($categoryId, $perPage)
     {
-        return Product::whereHas('subcategory', function ($query) use ($categoryId) {
+        $query = Product::whereHas('subcategory', function ($query) use ($categoryId) {
             $query->where('category_id', $categoryId);
-        })
-        ->with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
-        ->orderBy('created_at', 'desc')
-        ->paginate($perPage)
-        ->through(function ($product) {
-            return $this->formatProductData($product);
         });
+
+        $query = $this->applyUserTypeFilter($query);
+
+        return $query->with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->through(function ($product) {
+                return $this->formatProductData($product);
+            });
     }
+
 
     public function getProductsBySubCategory($subCategoryId, $perPage)
     {
-        return Product::where('sub_category_id', $subCategoryId)
-            ->with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
+        $query = Product::where('sub_category_id', $subCategoryId);
+
+        $query = $this->applyUserTypeFilter($query);
+
+        return $query->with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->through(function ($product) {
@@ -197,6 +227,8 @@ class ProductService
     public function searchProducts($name = null, $minPrice = 0, $maxPrice = PHP_INT_MAX, $perPage = 5)
     {
         $query = Product::query();
+
+        $query = $this->applyUserTypeFilter($query);
 
         if (!is_null($name) && !empty($name)) {
             $query->where('name', 'LIKE', "%$name%");
@@ -214,10 +246,14 @@ class ProductService
             });
     }
 
+
     public function getProductsByVendor($vendorId, $perPage)
     {
-        return Product::where('vendor_id', $vendorId)
-            ->with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
+        $query = Product::where('vendor_id', $vendorId);
+
+        $query = $this->applyUserTypeFilter($query);
+
+        return $query->with(['subcategory.Category', 'discount', 'images', 'ProductAttr.Attribute'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->through(function ($product) {

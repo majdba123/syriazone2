@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('coupons', function (Blueprint $table) {
+        Schema::create('contact_replies', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('code');
-            $table->string('discount_percent');
-            $table->string('status')->default('active');
-            $table->string('expires_at');
-
+            $table->foreignId('contact_id')->constrained()->onDelete('cascade');
+            $table->text('message');
             $table->timestamps();
         });
     }
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('coupons');
+        Schema::dropIfExists('contact_replies');
     }
 };

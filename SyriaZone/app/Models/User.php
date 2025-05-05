@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'type',
         'phone',
+        'image',
         'password',
         'lang',
         'lat'
@@ -69,5 +70,8 @@ class User extends Authenticatable
         return $this->hasOne(vendor::class);
     }
 
-
+    public function contacts()
+    {
+        return $this->morphMany(Contact::class, 'contactable');
+    }
 }

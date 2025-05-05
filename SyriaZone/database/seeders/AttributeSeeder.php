@@ -54,7 +54,7 @@ class AttributeSeeder extends Seeder
         foreach ($attributes as $name => $values) {
             Attribute::create([
                 'name' => $name,
-                'sub_category_id' => $subCategoryId,
+                'sub__categort_id' => $subCategoryId,
                 // يمكنك إضافة حقل للقيم المحتملة إذا كان موجوداً في جدولك
             ]);
         }

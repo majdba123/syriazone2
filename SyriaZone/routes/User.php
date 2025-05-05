@@ -3,11 +3,15 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ContactController;
+
 use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Category\SubCategortController;
 use App\Http\Controllers\Order\OrderController;
 use App\Http\Controllers\Product\RatingController;
+use App\Http\Controllers\Vendor\AnswerRatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/my_info/get', [ProfileController::class, 'getUserInfo']);
 
     */
+    Route::get('dashboard', [UserController::class, 'dashboard']);
 
     Route::prefix('categories')->group(function () {
         Route::get('get_all', [CategoryController::class, 'index']);
@@ -59,7 +64,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/get_product/{order_id}', [OrderController::class, 'getProductOrder']);
         });
 
-        
+
     Route::get('/rate/get_all', [RatingController::class, 'getUserRatings']);
     Route::post('/rate/store/{Product_id}', [RatingController::class, 'rateProduct']);
     Route::put('/rate/update/{Rate_id}', [RatingController::class, 'Update']);
@@ -67,7 +72,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/product/rating/{product_id}', [RatingController::class, 'getRateProduct']);
 
 
+    Route::prefix('profile')->group(function () {
+        Route::post('/update', [UserController::class, 'updateProfile']);
+        Route::get('/my_info', [UserController::class, 'getProfile']);
+    });
 
+    Route::prefix('contact')->group(function () {
+        Route::post('/store', [ContactController::class, 'store']);
+        Route::get('/my_contact', [ContactController::class, 'myContacts']);
+
+    });
 
 
 });

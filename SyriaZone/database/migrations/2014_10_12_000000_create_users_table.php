@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('lat', 12, 9)->nullable(); // خط العرض
             $table->decimal('lang', 12, 9)->nullable(); // خط الطول
             $table->string('phone')->unique()->nullable();
+            $table->string('image')->nullable();
             $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

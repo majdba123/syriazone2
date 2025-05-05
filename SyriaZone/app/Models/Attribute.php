@@ -11,13 +11,13 @@ class Attribute extends Model
 
     protected $fillable = [
         'name',
-        'sub_category_id'
+        'sub__categort_id'
     ];
 
 
     public function subcategory()
     {
-        return $this->belongsTo(Sub_Categort::class,'sub_category_id');
+        return $this->belongsTo(Sub_Categort::class, 'sub__categort_id');
     }
 
     public function ProductAttr()

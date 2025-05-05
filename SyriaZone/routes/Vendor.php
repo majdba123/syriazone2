@@ -12,7 +12,9 @@ use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\Vendor\AnswerRatingController;
 use App\Http\Controllers\Product\RatingController;
+use App\Http\Controllers\ContactController;
 
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +52,7 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
         Route::post('store', [ProductController::class, 'store']);
         Route::post('update/{product_id}', [ProductController::class, 'update']);
         Route::delete('delete/{product_id}', [ProductController::class, 'destroy']);
+        Route::post('/changeProductStock/{produc_id}', [ProductController::class, 'changeProductStock']);
 
 
 
@@ -79,13 +82,27 @@ Route::middleware(['auth:sanctum', 'vendor'])->group(function () {
         Route::get('/answer_rating/get_all/{rate_id}', [AnswerRatingController::class, 'getAnswersByRating']);
         Route::put('/answer_rating/update/{answer_rate_id}', [AnswerRatingController::class, 'update']);
         Route::delete('/answer_rating/delete/{answer_rate_id}', [AnswerRatingController::class, 'destroy']);
-    
-    
+
+
     });
 
 
     Route::prefix('commissions')->group(function () {
         Route::get('calculate', [CommissionController::class, 'getVendorCommission']);
         Route::get('calculate/Product/{poduct_id}', [CommissionController::class, 'calculateByProduct']);
+    });
+
+
+
+    Route::prefix('profile')->group(function () {
+        Route::post('/update', [UserController::class, 'updateProfile']);
+        Route::get('/my_info', [UserController::class, 'getProfile']);
+    });
+
+
+    Route::prefix('contact')->group(function () {
+        Route::post('/store', [ContactController::class, 'store']);
+        Route::get('/my_contact', [ContactController::class, 'myContacts']);
+
     });
 });
