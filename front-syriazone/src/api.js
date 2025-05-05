@@ -3,7 +3,6 @@ import { useToast } from "vue-toastification";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
-// إنشاء نسخة axios مخصصة
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -11,18 +10,14 @@ const apiClient = axios.create({
   },
 });
 
-// دالة لمعالجة الأخطاء بشكل مركزي
 const handleError = (error, toast) => {
   let errorMessage = "An error occurred";
 
   if (error.response) {
-    // الخطأ من الخادم مع كود حالة
     errorMessage = error.response.data.message || error.response.statusText;
   } else if (error.request) {
-    // تم إجراء الطلب ولكن لم يتم استلام أي رد
     errorMessage = "No response received from server";
   } else {
-    // حدث خطأ أثناء إعداد الطلب
     errorMessage = error.message;
   }
 
@@ -31,7 +26,6 @@ const handleError = (error, toast) => {
   throw error;
 };
 
-// (GET) - جلب البيانات
 export const getData = async (endpoint, headers = {}) => {
   const toast = useToast();
   try {
@@ -56,7 +50,7 @@ export const getData2 = async (endpoint, config = {}) => {
   }
 };
 
-// (POST) - إرسال بيانات جديدة
+// (POST)
 export const postData = async (endpoint, data, headers = {}) => {
   const toast = useToast();
   try {
@@ -68,7 +62,7 @@ export const postData = async (endpoint, data, headers = {}) => {
   }
 };
 
-// (PUT) - تحديث البيانات
+// (PUT) 
 export const putData = async (endpoint, data, headers = {}) => {
   const toast = useToast();
   try {
@@ -80,7 +74,7 @@ export const putData = async (endpoint, data, headers = {}) => {
   }
 };
 
-// (DELETE) - حذف البيانات
+// (DELETE)
 export const deleteData = async (endpoint, headers = {}) => {
   const toast = useToast();
   try {
@@ -92,7 +86,6 @@ export const deleteData = async (endpoint, headers = {}) => {
   }
 };
 
-// تصدير الدوال وثوابت API
 export default {
   API_BASE_URL,
   getData,
