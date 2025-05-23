@@ -22,7 +22,7 @@ class DiscountStoreRequest extends FormRequest
     {
         return [
             'value' => 'required|numeric|min:0|max:100',
-            'from_time' => 'required|date|after_or_equal:now',
+            'from_time' => 'required|date',
             'to_time' => 'required|date|after:from_time',
         ];
     }
