@@ -54,36 +54,33 @@ class vendor extends Model
 
     public function getCompletedOrdersCountAttribute()
     {
-        return $this->orders()->where('status', 'complete')->count();
+        return $this->orders()->where('order__products.status', 'complete')->count();
     }
 
     public function getPendingOrdersCountAttribute()
     {
-        return $this->orders()->where('status', 'pending')->count();
+        return $this->orders()->where('order__products.status', 'pending')->count();
     }
 
     public function getCancelledOrdersCountAttribute()
     {
-        return $this->orders()->where('status', 'cancelled')->count();
+        return $this->orders()->where('order__products.status', 'cancelled')->count();
     }
-
 
     public function getTotalSalesAttribute()
     {
-        return $this->orders()->where('status', 'complete')->sum('total_price');
+        return $this->orders()->where('order__products.status', 'complete')->sum('order__products.total_price');
     }
-
 
     public function getTotalSalesPendingAttribute()
     {
-        return $this->orders()->where('status', 'pending')->sum('total_price');
+        return $this->orders()->where('order__products.status', 'pending')->sum('order__products.total_price');
     }
 
-    // إجمالي العمولات
     public function getTotalCommissionsAttribute()
     {
-        return $this->orders()->where('status', 'complete')
-            ->with(['product.subcategory.category'])
+        return $this->orders()->where('order__products.status', 'complete')
+            ->with(['product.subcategory.Category'])
             ->get()
             ->sum(function($order) {
                 $rate = $order->product->subcategory->category->percent / 100;

@@ -9,7 +9,7 @@ use App\Models\vendor;
 
 class VendorDashboardService
 {
-    public function getDashboardData(Vendor $vendor)
+    public function getDashboardData(vendor $vendor)
     {
         return [
             'stats' => [
