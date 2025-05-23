@@ -124,6 +124,8 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Price</th>
+                <th>Discount</th>
+
                 <th>Subcategory</th>
                 <th>Images</th>
                 <th>Actions</th>
@@ -151,6 +153,12 @@
                       step="0.01"
                       class="custom-input"
                     />
+                  </td>
+                  <td>
+                    <span v-if="product.discount" class="discount-badge">
+                      {{ product.discount.value }}%
+                    </span>
+                    <span v-else class="no-discount">None</span>
                   </td>
                   <td>
                     <select
@@ -195,14 +203,23 @@
                 <template v-else>
                   <td>{{ product.name }}</td>
                   <td>{{ product.description }}</td>
-                  <td>${{ product.price.toFixed(2) }}</td>
-                  <td>{{ getSubcategoryName(product.sub_category_id) }}</td>
+                  <td>${{ product.final_price }}</td>
+                  <td>
+                    <span
+                      v-if="product.discount.is_discount_active != false"
+                      class="discount-badge"
+                    >
+                      {{ product.discount.value }}%
+                    </span>
+                    <span v-else class="no-discount">None</span>
+                  </td>
+                  <td>{{ product.subcategory }}</td>
                   <td>
                     <div class="image-preview">
                       <img
                         v-for="(img, idx) in product.images"
                         :key="idx"
-                        :src="img.url"
+                        :src="img.url || img"
                         class="thumbnail"
                       />
                     </div>
@@ -221,7 +238,30 @@
                       >
                         🗑️
                       </button>
+                      <button
+                        v-if="product.discount.is_discount_active == false"
+                        class="add-discount-btn"
+                        @click="openAddDiscountModal(product)"
+                      >
+                        إضافة خصم
+                      </button>
+                      <template v-else>
+                        <button
+                          class="edit-discount-btn"
+                          @click="openEditDiscountModal(product)"
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          class="remove-discount-btn"
+                          @click="confirmDeleteDiscount(product)"
+                        >
+                          حذف
+                        </button>
+                      </template>
                     </template>
+                    <!-- بعد الجدول مباشرة -->
+
                     <template v-else>
                       <button class="save-btn" @click="saveProduct(product)">
                         ✔️
@@ -238,211 +278,424 @@
               </tr>
             </tbody>
           </table>
+          <div v-if="products.length > 0" class="pagination-controls">
+            <button
+              @click="fetchProducts(pagination.current_page - 1)"
+              :disabled="pagination.current_page === 1"
+              class="pagination-button"
+            >
+              السابق
+            </button>
+
+            <span class="page-info">
+              الصفحة {{ pagination.current_page }} من
+              {{ pagination.last_page }}
+            </span>
+
+            <button
+              @click="fetchProducts(pagination.current_page + 1)"
+              :disabled="pagination.current_page === pagination.last_page"
+              class="pagination-button"
+            >
+              التالي
+            </button>
+          </div>
           <div v-else class="no-data">ℹ️ No products found</div>
         </template>
       </div>
     </div>
   </div>
+  <div
+    v-if="showDiscountModal"
+    class="modal-overlay"
+    @click.self="closeDiscountModal"
+  >
+    <div class="modal-content">
+      <button class="close-modal" @click="closeDiscountModal">✖</button>
+      <h3>{{ editingDiscount ? 'تعديل الخصم' : 'إضافة خصم' }}</h3>
+
+      <form @submit.prevent="submitDiscount">
+        <div class="form-group">
+          <label>نسبة الخصم (%)</label>
+          <input
+            v-model="discountForm.value"
+            type="number"
+            min="1"
+            max="100"
+            required
+            class="custom-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>تاريخ البدء</label>
+          <input
+            v-model="discountForm.from_time"
+            type="date"
+            required
+            class="custom-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>تاريخ الانتهاء</label>
+          <input
+            v-model="discountForm.to_time"
+            type="date"
+            required
+            class="custom-input"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" @click="closeDiscountModal">
+            إلغاء
+          </button>
+          <button type="submit" class="save-btn">
+            {{ editingDiscount ? 'تحديث' : 'حفظ' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="data-table">
+    <!-- Existing table header remains the same -->
+  </div>
 </template>
 
 <script>
-import { getData, postData, putData, deleteData } from "@/api";
-import { useToast } from "vue-toastification";
-import SideBarvendor from "@/components/SideBarvendor.vue";
+import { getData, postData, putData, deleteData } from '@/api'
+import { useToast } from 'vue-toastification'
+import SideBarvendor from '@/components/SideBarvendor.vue'
 
 export default {
-  name: "AddProduct",
+  name: 'AddProduct',
   components: { SideBarvendor },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
+      showDiscountModal: false,
+      editingDiscount: false,
+      currentProduct: null,
+      discountForm: {
+        value: '',
+        from_time: '',
+        to_time: '',
+      },
+      pagination: {
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+        per_page: 10,
+        links: [],
+      },
       product: {
-        name: "",
-        description: "",
+        name: '',
+        description: '',
         price: 0,
-        sub_category_id: "",
+        sub_category_id: '',
         images: [],
       },
       filters: {
-        name: "",
-        subcategory_id: "",
-        min_price: "",
-        max_price: "",
+        name: '',
+        subcategory_id: '',
+        min_price: '',
+        max_price: '',
       },
       products: [],
       subcategories: [],
       loading: false,
       error: null,
       editFiles: [],
-    };
+    }
   },
   computed: {
     getSubcategoryName() {
       return (id) => {
-        const sub = this.subcategories.find((s) => s.id === id);
-        return sub ? sub.name : "Unknown";
-      };
+        const sub = this.subcategories.find((s) => s.id === id)
+        return sub ? sub.name : 'Unknown'
+      }
     },
   },
   methods: {
-    async fetchSubcategories() {
-      const token = localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
+    openAddDiscountModal(product) {
+      this.currentProduct = product
+      this.editingDiscount = false
+      this.discountForm = {
+        value: '',
+        from_time: this.formatDateTime(new Date()),
+        to_time: this.formatDateTime(this.getDefaultEndDate()),
+      }
+      this.showDiscountModal = true
+    },
+
+    openEditDiscountModal(product) {
+      this.currentProduct = product
+      this.editingDiscount = true
+      this.discountForm = {
+        value: product.discount.value,
+        from_time: this.formatDateTimeForInput(product.discount.from_time),
+        to_time: this.formatDateTimeForInput(product.discount.to_time),
+      }
+      this.showDiscountModal = true
+    },
+
+    closeDiscountModal() {
+      this.showDiscountModal = false
+      this.currentProduct = null
+    },
+
+    async submitDiscount() {
       try {
-        const response = await getData("/vendor/subcategories/getall", headers);
-        this.subcategories = response;
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+
+        if (this.editingDiscount) {
+          // Update existing discount
+          await putData(
+            `/vendor/product/discount/update/${this.currentProduct.discount.id}`,
+            { value: this.discountForm.value },
+            headers
+          )
+          this.toast.success('تم تحديث الخصم بنجاح')
+        } else {
+          console.log(this.discountForm)
+          // Add new discount
+          await postData(
+            `/vendor/product/discount/store/${this.currentProduct.id}`,
+            this.discountForm,
+            headers
+          )
+          this.toast.success('تم إضافة الخصم بنجاح')
+        }
+
+        this.closeDiscountModal()
+        await this.fetchProducts()
       } catch (error) {
-        this.toast.error("Failed to load subcategories");
+        this.toast.error('حدث خطأ أثناء حفظ الخصم')
+        console.error('Discount error:', error)
       }
     },
 
-    async fetchProducts() {
-      this.loading = true;
+    confirmDeleteDiscount(product) {
+      if (confirm('هل أنت متأكد من حذف هذا الخصم؟')) {
+        this.deleteDiscount(product)
+      }
+    },
+
+    async deleteDiscount(product) {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const params = new URLSearchParams();
-        if (this.filters.name) params.append("name", this.filters.name);
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+
+        await deleteData(
+          `/vendor/product/discount/destroy/${product.discount.id}`,
+          headers
+        )
+
+        this.toast.success('تم حذف الخصم بنجاح')
+        await this.fetchProducts()
+      } catch (error) {
+        this.toast.error('حدث خطأ أثناء حذف الخصم')
+        console.error('Delete discount error:', error)
+      }
+    },
+
+    formatDateTime(date) {
+      const pad = (num) => num.toString().padStart(2, '0')
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate()
+      )}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+    },
+
+    formatDateTimeForInput(dateString) {
+      return dateString.replace(' ', 'T')
+    },
+
+    getDefaultEndDate() {
+      const date = new Date()
+      date.setFullYear(date.getFullYear() + 1)
+      return date
+    },
+    async fetchSubcategories() {
+      const token = localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
+      try {
+        const response = await getData(
+          '/vendor/subcategories/getall_subcategory',
+          headers
+        )
+        this.subcategories = response
+      } catch (error) {
+        this.toast.error('Failed to load subcategories')
+      }
+    },
+
+    async fetchProducts(page = 1) {
+      this.loading = true
+      try {
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const params = new URLSearchParams()
+
+        if (this.filters.name) params.append('name', this.filters.name)
         if (this.filters.subcategory_id)
-          params.append("subcategory_id", this.filters.subcategory_id);
+          params.append('subcategory_id', this.filters.subcategory_id)
         if (this.filters.min_price)
-          params.append("min_price", this.filters.min_price);
+          params.append('min_price', this.filters.min_price)
         if (this.filters.max_price)
-          params.append("max_price", this.filters.max_price);
+          params.append('max_price', this.filters.max_price)
+
+        params.append('page', page)
 
         const response = await getData(
           `/vendor/product/get_all?${params.toString()}`,
           headers
-        );
-        this.products = response.map((p) => ({
+        )
+
+        this.products = response.products.data.map((p) => ({
           ...p,
+          discount: p.discount_info,
           editing: false,
           editName: p.name,
           editDescription: p.description,
-          editPrice: p.price,
-          editSubcategory: p.sub_category_id,
-          editImages: [...p.images],
-        }));
+          editPrice: p.original_price, // استخدام original_price بدلاً من price
+          editSubcategory: p.subcategory_id,
+          editImages: [...(p.images || [])],
+        }))
+        console.log(this.products)
+        // حفظ معلومات Pagination
+        this.pagination = {
+          current_page: response.products.current_page,
+          last_page: response.products.last_page,
+          total: response.products.total,
+          per_page: response.products.per_page,
+          links: response.products.links,
+        }
       } catch (error) {
-        this.error = "Failed to load products";
+        this.error = 'Failed to load products'
+        console.error('Error fetching products:', error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     handleFileUpload(e) {
-      this.product.images = [...e.target.files];
+      this.product.images = [...e.target.files]
     },
 
     handleEditFileUpload(e) {
-      this.editFiles = [...e.target.files];
+      this.editFiles = [...e.target.files]
     },
 
     async addProduct() {
-      const token = localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
-      const formData = new FormData();
-      formData.append("name", this.product.name);
-      formData.append("description", this.product.description);
-      formData.append("price", this.product.price);
-      formData.append("sub_category_id", this.product.sub_category_id);
+      const token = localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
+      const formData = new FormData()
+      formData.append('name', this.product.name)
+      formData.append('description', this.product.description)
+      formData.append('price', this.product.price)
+      formData.append('sub_category_id', this.product.sub_category_id)
 
       this.product.images.forEach((file, index) => {
-        formData.append(`images[${index}]`, file);
-      });
+        formData.append(`images[${index}]`, file)
+      })
 
       try {
-        await postData("/vendor/product/store", formData, headers);
-        this.toast.success("Product added successfully");
-        this.resetForm();
-        await this.fetchProducts();
+        console.log(
+          this.product.name,
+          this.product.description,
+          this.product.price,
+          this.product.images
+        )
+        await postData('/vendor/product/store', formData, headers)
+        this.toast.success('Product added successfully')
+        this.resetForm()
+        await this.fetchProducts()
       } catch (error) {
-        this.toast.error("Failed to add product");
+        this.toast.error('Failed to add product')
       }
     },
 
     startEditing(product) {
-      product.editing = true;
-      this.editFiles = [];
+      product.editing = true
+      this.editFiles = []
     },
 
     async saveProduct(product) {
-      const token = localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
-      const formData = new FormData();
-      formData.append("name", product.editName);
-      formData.append("description", product.editDescription);
-      formData.append("price", product.editPrice);
-      formData.append("sub_category_id", product.editSubcategory);
+      const token = localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
+      const formData = new FormData()
+
+      formData.append('name', product.editName)
+      formData.append('description', product.editDescription)
+      formData.append('price', product.editPrice) // أو original_price إذا كان الخادم يتوقعه
+      formData.append('sub_category_id', product.editSubcategory)
 
       // Add new files
       this.editFiles.forEach((file, index) => {
-        formData.append(`images[${index}]`, file);
-      });
+        formData.append(`images[${index}]`, file)
+      })
 
       try {
-        await putData(
-          `/vendor/product/update/${product.id}`,
-          formData,
-          headers
-        );
-        this.toast.success("Product updated successfully");
-        await this.fetchProducts();
+        await putData(`/vendor/product/update/${product.id}`, formData, headers)
+        this.toast.success('Product updated successfully')
+        await this.fetchProducts()
       } catch (error) {
-        this.toast.error("Failed to update product");
+        this.toast.error('Failed to update product')
       }
     },
 
     async deleteProduct(id) {
-      const token = localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
-      if (!confirm("Are you sure you want to delete this product?")) return;
+      const token = localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
+      if (!confirm('Are you sure you want to delete this product?')) return
 
       try {
-        await deleteData(`/product_provider/product/delete/${id}`, headers);
-        this.toast.success("Product deleted successfully");
-        await this.fetchProducts();
+        await deleteData(`/product_provider/product/delete/${id}`, headers)
+        this.toast.success('Product deleted successfully')
+        await this.fetchProducts()
       } catch (error) {
-        this.toast.error("Failed to delete product");
+        this.toast.error('Failed to delete product')
       }
     },
 
     removeImage(index) {
-      this.product.editImages.splice(index, 1);
+      this.product.editImages.splice(index, 1)
     },
 
     applyFilters() {
-      this.fetchProducts();
+      this.fetchProducts(1) // العودة للصفحة الأولى عند تطبيق الفلتر
     },
 
     resetFilters() {
       this.filters = {
-        name: "",
-        subcategory_id: "",
-        min_price: "",
-        max_price: "",
-      };
-      this.fetchProducts();
+        name: '',
+        subcategory_id: '',
+        min_price: '',
+        max_price: '',
+      }
+      this.fetchProducts(1) // العودة للصفحة الأولى عند إعادة تعيين الفلتر
     },
 
     resetForm() {
       this.product = {
-        name: "",
-        description: "",
+        name: '',
+        description: '',
         price: 0,
-        sub_category_id: "",
+        sub_category_id: '',
         images: [],
-      };
+      }
     },
   },
   created() {
-    this.fetchSubcategories();
-    this.fetchProducts();
+    this.fetchSubcategories()
+    this.fetchProducts(1) // تحميل الصفحة الأولى مباشرة
   },
-};
+}
 </script>
 
 <style scoped>
@@ -452,7 +705,7 @@ export default {
   grid-template-columns: 14rem auto;
   gap: 1.8rem;
   min-height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard {
@@ -534,6 +787,39 @@ textarea {
   background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
   box-shadow: 0 2px 5px rgba(41, 128, 185, 0.3);
+} /* Pagination Styles */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.pagination-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: #7f8c8d;
+  font-size: 0.9rem;
 }
 
 .add-button:hover {
@@ -612,6 +898,127 @@ textarea {
 .cancel-btn:hover {
   transform: scale(1.1);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+.discount-badge {
+  background: #e8f6f3;
+  color: #27ae60;
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.no-discount {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+}
+
+/* Discount Action Buttons */
+.add-discount-btn {
+  background: #3498db;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.add-discount-btn:hover {
+  background: #2980b9;
+}
+
+.edit-discount-btn {
+  background: #f39c12;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.edit-discount-btn:hover {
+  background: #e67e22;
+}
+
+.remove-discount-btn {
+  background: #e74c3c;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  margin-right: 0.5rem;
+}
+
+.remove-discount-btn:hover {
+  background: #c0392b;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #7f8c8d;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: #2ecc71;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 /* Table Styles */
@@ -767,7 +1174,7 @@ tr:hover {
 }
 
 /* File Input Styling */
-input[type="file"] {
+input[type='file'] {
   width: 100%;
   padding: 0.5rem;
   border: 1px dashed #3498db;
@@ -776,7 +1183,7 @@ input[type="file"] {
   transition: all 0.3s;
 }
 
-input[type="file"]:hover {
+input[type='file']:hover {
   background-color: rgba(52, 152, 219, 0.1);
 }
 

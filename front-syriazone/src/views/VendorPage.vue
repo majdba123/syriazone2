@@ -81,11 +81,11 @@
             <tbody>
               <tr v-for="(vendor, index) in filteredVendors" :key="vendor.id">
                 <td>{{ index + 1 }}</td>
-                <td>{{ vendor.name }}</td>
-                <td>{{ vendor.email }}</td>
+                <td>{{ vendor.user.name }}</td>
+                <td>{{ vendor.user.email }}</td>
                 <td>
                   <span :class="['status-badge', statusClass(vendor.status)]">
-                    {{ vendor.status }}
+                    {{ vendor.vendor.status }}
                   </span>
                 </td>
                 <td>
@@ -182,101 +182,99 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData, postData, putData } from "@/api";
-import { useToast } from "vue-toastification";
+import SideBar from '@/components/SideBar.vue'
+import { getData, postData, putData } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "VendorPage",
+  name: 'VendorPage',
   components: {
     SideBar,
   },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
       vendor: {
-        name: "",
-        email: "",
-        password: "",
+        name: '',
+        email: '',
+        password: '',
       },
       vendors: [],
-      filterStatus: "",
+      filterStatus: '',
       loading: false,
       error: null,
       editingVendor: null,
       selectedStats: null,
-    };
+    }
   },
   computed: {
     filteredVendors() {
-      if (!Array.isArray(this.vendors)) return [];
-      if (!this.filterStatus) return this.vendors;
-      return this.vendors.filter((v) => v.status === this.filterStatus);
+      if (!Array.isArray(this.vendors)) return []
+      if (!this.filterStatus) return this.vendors
+      return this.vendors.filter((v) => v.status === this.filterStatus)
     },
   },
   methods: {
     statusClass(status) {
       return {
-        pending: status === "pending",
-        active: status === "active",
-        pand: status === "pand",
-      };
+        pending: status === 'pending',
+        active: status === 'active',
+        pand: status === 'pand',
+      }
     },
     async fetchVendors() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData(
-          "/admin/vendores/get_by_status",
-          headers
-        );
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData('/admin/vendores/get_by_status', headers)
         // Ensure we're extracting the array from the response
-        this.vendors = response.data || []; // Adjust according to actual response structure
+        this.vendors = response.data || [] // Adjust according to actual response structure
+        console.log(response)
       } catch (error) {
-        this.error = "Failed to load vendors";
-        console.error(error);
+        this.error = 'Failed to load vendors'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
     async addVendor() {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
 
         await postData(
-          "/admin/vendores/store",
+          '/admin/vendores/store',
           {
             name: this.vendor.name,
             email: this.vendor.email,
             password: this.vendor.password,
           },
           headers
-        );
+        )
 
-        this.toast.success("Vendor added successfully");
-        this.vendor = { name: "", email: "", password: "" };
-        await this.fetchVendors();
+        this.toast.success('Vendor added successfully')
+        this.vendor = { name: '', email: '', password: '' }
+        await this.fetchVendors()
       } catch (error) {
-        this.toast.error("Failed to add vendor");
-        console.error(error);
+        this.toast.error('Failed to add vendor')
+        console.error(error)
       }
     },
     startEditing(vendor) {
-      this.editingVendor = { ...vendor };
+      this.editingVendor = { ...vendor }
     },
     cancelEditing() {
-      this.editingVendor = null;
+      this.editingVendor = null
     },
     async saveChanges() {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
 
         await putData(
           `/admin/vendores/update/${this.editingVendor.id}`,
@@ -286,14 +284,14 @@ export default {
             status: this.editingVendor.status,
           },
           headers
-        );
+        )
 
-        this.toast.success("Vendor updated successfully");
-        this.editingVendor = null;
-        await this.fetchVendors();
+        this.toast.success('Vendor updated successfully')
+        this.editingVendor = null
+        await this.fetchVendors()
       } catch (error) {
-        this.toast.error("Failed to update vendor");
-        console.error(error);
+        this.toast.error('Failed to update vendor')
+        console.error(error)
       }
     },
     // async confirmDelete(id) {
@@ -313,23 +311,23 @@ export default {
     // },
     async showStats(id) {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
         const response = await getData(
           `/admin/vendores/get_statical_commission/${id}`,
           headers
-        );
-        this.selectedStats = response.stats;
+        )
+        this.selectedStats = response.stats
       } catch (error) {
-        this.toast.error("Failed to load vendor statistics");
-        console.error(error);
+        this.toast.error('Failed to load vendor statistics')
+        console.error(error)
       }
     },
   },
   created() {
-    this.fetchVendors();
+    this.fetchVendors()
   },
-};
+}
 </script>
 
 <style scoped>

@@ -78,47 +78,47 @@
 </template>
 
 <script>
-import { postData } from "@/api";
-import { useToast } from "vue-toastification";
+import { postData } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
   data() {
     return {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    };
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    }
   },
   methods: {
     async handleSubmit() {
-      const toast = useToast();
+      const toast = useToast()
 
       if (this.password !== this.confirmPassword) {
-        toast.error("Passwords do not match!");
-        return;
+        toast.error('Passwords do not match!')
+        return
       }
 
       if (!this.name || !this.email || !this.password) {
-        toast.error("Please fill out all fields correctly.");
-        return;
+        toast.error('Please fill out all fields correctly.')
+        return
       }
 
       const userData = {
         name: this.name,
         email: this.email,
         password: this.password,
-      };
+      }
       try {
-        const response = await postData("/api/register", userData);
-        console.log(response);
-        this.$router.push("/LoginPage");
+        const response = await postData('/api/register', userData)
+        console.log(response)
+        this.$router.push('/LoginPage')
       } catch (error) {
-        console.error("Error posting data:", error);
+        console.error('Error posting data:', error)
       }
     },
   },
-};
+}
 </script>
 
 <style scoped>
@@ -128,7 +128,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: url("@/assets/background.webp"); /* ضع رابط الخلفية هنا */
+  background-image: url('@/assets/background.webp'); /* ضع رابط الخلفية هنا */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -208,16 +208,16 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData2 } from "@/api";
-import { useToast } from "vue-toastification";
+import SideBar from '@/components/SideBar.vue'
+import { getData2 } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "OrderManagement",
+  name: 'OrderManagement',
   components: { SideBar },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
@@ -228,25 +228,25 @@ export default {
       orders: [],
       vendors: [],
       subcategories: [],
-      currentFilter: "status",
-      selectedStatus: "all",
-      selectedVendor: "",
-      selectedSubcategory: "",
+      currentFilter: 'status',
+      selectedStatus: 'all',
+      selectedVendor: '',
+      selectedSubcategory: '',
       loading: false,
       error: null,
       pagination: {
         per_page: 10,
         links: [],
       },
-    };
+    }
   },
   methods: {
     async getAuthConfig() {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem('access_token')
       return {
         headers: { Authorization: `Bearer ${token}` },
         params: this.cleanParams(),
-      };
+      }
     },
 
     cleanParams() {
@@ -255,141 +255,139 @@ export default {
         max_price: this.maxPrice,
         category_id: this.selectedCategory,
         per_page: this.pagination.per_page,
-        status: this.selectedStatus !== "all" ? this.selectedStatus : null,
+        status: this.selectedStatus !== 'all' ? this.selectedStatus : null,
         vendor_id: this.selectedVendor,
         subcategory_id: this.selectedSubcategory,
-      };
+      }
 
       // Remove null values
       Object.keys(params).forEach((key) => {
-        if (params[key] === null || params[key] === "") delete params[key];
-      });
+        if (params[key] === null || params[key] === '') delete params[key]
+      })
 
-      return params;
+      return params
     },
 
     async fetchData() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
 
       try {
-        const config = await this.getAuthConfig();
-        let endpoint = `/admin/orders/get_all_by_status?status=${this.selectedStatus}`;
+        const config = await this.getAuthConfig()
+        let endpoint = `/admin/orders/get_all_by_status?status=${this.selectedStatus}`
 
-        if (this.currentFilter === "vendor") {
-          endpoint = `/admin/orders/get_all/ByVendor/${this.selectedVendor}`;
-        } else if (this.currentFilter === "subcategory") {
-          endpoint = `/admin/orders/get_all_by_sub_category/${this.selectedSubcategory}`;
-        } else if (this.currentFilter === "price") {
-          endpoint = `/admin/orders/get_all_by_price?min_price=${this.minPrice}&max_price=${this.maxPrice}`;
-        } else if (this.currentFilter === "category") {
-          endpoint = `/admin/orders/get_all_by_category/${this.selectedCategory}`;
+        if (this.currentFilter === 'vendor') {
+          endpoint = `/admin/orders/get_all/ByVendor/${this.selectedVendor}`
+        } else if (this.currentFilter === 'subcategory') {
+          endpoint = `/admin/orders/get_all_by_sub_category/${this.selectedSubcategory}`
+        } else if (this.currentFilter === 'price') {
+          endpoint = `/admin/orders/get_all_by_price?min_price=${this.minPrice}&max_price=${this.maxPrice}`
+        } else if (this.currentFilter === 'category') {
+          endpoint = `/admin/orders/get_all_by_category/${this.selectedCategory}`
         }
 
-        const response = await getData2(endpoint, config);
+        const response = await getData2(endpoint, config)
 
-        this.orders = response.orders.data || response.orders;
-        this.processPagination(response);
+        this.orders = response.orders.data || response.orders
+        console.log(response)
+        this.processPagination(response)
       } catch (error) {
-        this.error = "Failed to load orders";
-        console.error(error);
+        this.error = 'Failed to load orders'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
     async fetchCategories() {
       try {
-        const config = await this.getAuthConfig();
-        const response = await getData2("/admin/categories/get_all", config);
-        this.categories = response.data || response;
+        const config = await this.getAuthConfig()
+        const response = await getData2('/admin/categories/get_all', config)
+        this.categories = response.data || response
       } catch (error) {
-        this.toast.error("Failed to load categories");
+        this.toast.error('Failed to load categories')
       }
     },
 
     processPagination(response) {
       if (response.orders && response.orders.links) {
-        this.pagination.links = response.orders.links;
+        this.pagination.links = response.orders.links
       } else {
-        this.pagination.links = [];
+        this.pagination.links = []
       }
     },
 
     async fetchVendors() {
       try {
-        const config = await this.getAuthConfig();
-        const response = await getData2(
-          "/admin/vendores/get_by_status",
-          config
-        );
-        this.vendors = response.data || response;
+        const config = await this.getAuthConfig()
+        const response = await getData2('/admin/vendores/get_by_status', config)
+        this.vendors = response.data || response
       } catch (error) {
-        this.toast.error("Failed to load vendors");
+        this.toast.error('Failed to load vendors')
       }
     },
 
     async fetchSubcategories() {
       try {
-        const config = await this.getAuthConfig();
-        const response = await getData2("/admin/subcategories/getall", config);
-        this.subcategories = response.data || response;
+        const config = await this.getAuthConfig()
+        const response = await getData2('/admin/subcategories/getall', config)
+        this.subcategories = response.data || response
       } catch (error) {
-        this.toast.error("Failed to load subcategories");
+        this.toast.error('Failed to load subcategories')
       }
     },
 
     applyFilters() {
-      this.pagination.links = [];
-      this.fetchData();
+      this.pagination.links = []
+      this.fetchData()
     },
 
     resetFilters() {
-      this.minPrice = null;
-      this.maxPrice = null;
-      this.selectedCategory = null;
-      this.currentFilter = "status";
-      this.selectedStatus = "all";
-      this.selectedVendor = "";
-      this.selectedSubcategory = "";
-      this.pagination.per_page = 10;
-      this.fetchData();
+      this.minPrice = null
+      this.maxPrice = null
+      this.selectedCategory = null
+      this.currentFilter = 'status'
+      this.selectedStatus = 'all'
+      this.selectedVendor = ''
+      this.selectedSubcategory = ''
+      this.pagination.per_page = 10
+      this.fetchData()
     },
 
     changePage(url) {
-      if (!url) return;
-      const page = new URL(url).searchParams.get("page");
-      this.pagination.current_page = page;
-      this.fetchData();
+      if (!url) return
+      const page = new URL(url).searchParams.get('page')
+      this.pagination.current_page = page
+      this.fetchData()
     },
 
     formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
     },
 
     viewOrderDetails(order) {
       // Implement view details logic
-      console.log("View order:", order);
+      console.log('View order:', order)
     },
 
     updateOrderStatus(order) {
       // Implement update status logic
-      console.log("Update status for order:", order);
+      console.log('Update status for order:', order)
     },
   },
   mounted() {
-    this.selectedStatus = "all";
-    this.fetchCategories();
-    this.fetchVendors();
-    this.fetchSubcategories();
-    this.fetchData();
+    this.selectedStatus = 'all'
+    this.fetchCategories()
+    this.fetchVendors()
+    this.fetchSubcategories()
+    this.fetchData()
   },
-};
+}
 </script>
 
 <style scoped>
@@ -405,7 +403,7 @@ export default {
   padding: 0 0.5rem;
 }
 
-.custom-input[type="number"] {
+.custom-input[type='number'] {
   width: 100px;
 }
 /* General Styles */
@@ -414,7 +412,7 @@ export default {
   grid-template-columns: 14rem auto;
   gap: 1.8rem;
   min-height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard {
@@ -729,7 +727,7 @@ tr:hover {
 }
 
 /* File Input Styling */
-input[type="file"] {
+input[type='file'] {
   width: 100%;
   padding: 0.5rem;
   border: 1px dashed #3498db;
@@ -738,7 +736,7 @@ input[type="file"] {
   transition: all 0.3s;
 }
 
-input[type="file"]:hover {
+input[type='file']:hover {
   background-color: rgba(52, 152, 219, 0.1);
 }
 

@@ -15,16 +15,16 @@
 
 <script>
 export default {
-  name: "HeaderPage",
+  name: 'HeaderPage',
   data() {
-    return {};
+    return {}
   },
   methods: {
     goToLogin() {
-      this.$router.push("LoginPage");
+      this.$router.push('LoginPage')
     },
   },
-};
+}
 </script>
 
 <style>
@@ -117,7 +117,7 @@ body {
 }
 
 .header .cart::after {
-  content: "0";
+  content: '0';
   position: absolute;
   top: -8px;
   right: -8px;

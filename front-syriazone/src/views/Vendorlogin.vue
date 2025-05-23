@@ -7,13 +7,13 @@
 </template>
 
 <script>
-import SideBarvendor from "@/components/SideBarvendor.vue";
+import SideBarvendor from '@/components/SideBarvendor.vue'
 export default {
-  name: "VendorLogin",
+  name: 'VendorLogin',
   components: {
     SideBarvendor,
   },
-};
+}
 </script>
 
 <style scoped>

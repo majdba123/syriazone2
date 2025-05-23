@@ -140,22 +140,22 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData2, deleteData } from "@/api";
-import { useToast } from "vue-toastification";
+import SideBar from '@/components/SideBar.vue'
+import { getData2, deleteData } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
   components: { SideBar },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
       searchParams: {
-        name: "",
-        min_price: "",
-        max_price: "",
+        name: '',
+        min_price: '',
+        max_price: '',
         per_page: 10,
         page: 1,
       },
@@ -167,56 +167,56 @@ export default {
       subcategories: [],
       selectedCategory: null,
       selectedSubcategory: null,
-    };
+    }
   },
   methods: {
     async getAuthConfig() {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem('access_token')
       return {
         headers: { Authorization: `Bearer ${token}` },
         params: this.cleanParams(),
-      };
+      }
     },
 
     cleanParams() {
-      const params = { ...this.searchParams };
+      const params = { ...this.searchParams }
 
       // إزالة القيم الفارغة
       Object.keys(params).forEach((key) => {
-        if (params[key] === "") delete params[key];
-      });
+        if (params[key] === '') delete params[key]
+      })
 
       // إدارة معلمات الفلترة الخاصة
       if (this.selectedCategory || this.selectedSubcategory) {
-        delete params.page;
-        delete params.per_page;
+        delete params.page
+        delete params.per_page
       }
 
-      return params;
+      return params
     },
 
     async searchProducts() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
       try {
-        const config = await this.getAuthConfig();
-        let endpoint = "/admin/product/search";
+        const config = await this.getAuthConfig()
+        let endpoint = '/admin/product/search'
 
         if (this.selectedSubcategory) {
-          endpoint = `/admin/product/subcategory/${this.selectedSubcategory}`;
+          endpoint = `/admin/product/subcategory/${this.selectedSubcategory}`
         } else if (this.selectedCategory) {
-          endpoint = `/admin/product/category/${this.selectedCategory}`;
+          endpoint = `/admin/product/category/${this.selectedCategory}`
         }
 
-        const response = await getData2(endpoint, config);
+        const response = await getData2(endpoint, config)
 
-        this.products = response.products.data || response.products;
-        this.processPagination(response);
+        this.products = response.products.data || response.products
+        this.processPagination(response)
       } catch (error) {
-        this.error = "Failed to fetch products";
-        console.error(error);
+        this.error = 'Failed to fetch products'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
@@ -227,73 +227,73 @@ export default {
           last_page: response.products.last_page,
           links: response.products.links,
           per_page: response.products.per_page,
-        };
+        }
       } else {
-        this.pagination = null;
+        this.pagination = null
       }
     },
 
     async fetchCategories() {
       try {
-        const config = await this.getAuthConfig();
-        const response = await getData2("/admin/categories/get_all", config);
-        this.categories = response;
-        console.log(response);
+        const config = await this.getAuthConfig()
+        const response = await getData2('/admin/categories/get_all', config)
+        this.categories = response
+        console.log(response)
       } catch (error) {
-        console.error("Failed to fetch categories:", error);
+        console.error('Failed to fetch categories:', error)
       }
     },
 
     async fetchSubcategories(categoryId) {
       if (!categoryId) {
-        this.subcategories = [];
-        return;
+        this.subcategories = []
+        return
       }
       try {
-        const config = await this.getAuthConfig();
+        const config = await this.getAuthConfig()
         const response = await getData2(
           `/admin/subcategories/getall?category_id=${categoryId}`,
           config
-        );
-        this.subcategories = response.data;
-        this.selectedSubcategory = null;
+        )
+        this.subcategories = response.data
+        this.selectedSubcategory = null
       } catch (error) {
-        console.error("Failed to fetch subcategories:", error);
+        console.error('Failed to fetch subcategories:', error)
       }
     },
 
     resetSearch() {
       this.searchParams = {
-        name: "",
-        min_price: "",
-        max_price: "",
+        name: '',
+        min_price: '',
+        max_price: '',
         per_page: 10,
         page: 1,
-      };
-      this.selectedCategory = null;
-      this.selectedSubcategory = null;
-      this.subcategories = [];
-      this.searchProducts();
+      }
+      this.selectedCategory = null
+      this.selectedSubcategory = null
+      this.subcategories = []
+      this.searchProducts()
     },
     async deleteProduct(productId) {
-      if (confirm("Are you sure you want to delete this product?")) {
+      if (confirm('Are you sure you want to delete this product?')) {
         try {
-          const config = await this.getAuthConfig();
-          await deleteData(`/admin/products/${productId}`, config);
-          this.toast.success("Product deleted successfully");
-          await this.searchProducts();
+          const config = await this.getAuthConfig()
+          await deleteData(`/admin/products/${productId}`, config)
+          this.toast.success('Product deleted successfully')
+          await this.searchProducts()
         } catch (error) {
-          this.toast.error("Failed to delete product");
+          this.toast.error('Failed to delete product')
         }
       }
     },
   },
   mounted() {
-    this.fetchCategories();
+    this.fetchCategories()
 
-    this.searchProducts();
+    this.searchProducts()
   },
-};
+}
 </script>
 
 <style scoped>

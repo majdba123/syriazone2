@@ -132,188 +132,188 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData, postData, putData, deleteData } from "@/api";
-import { useToast } from "vue-toastification";
+import SideBar from '@/components/SideBar.vue'
+import { getData, postData, putData, deleteData } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "AddSubCategory",
+  name: 'AddSubCategory',
   components: {
     SideBar,
   },
   data() {
     return {
-      subCategoryName: "",
-      selectedCategory: "",
+      subCategoryName: '',
+      selectedCategory: '',
       categories: [],
       subCategories: [],
       loading: false,
       error: null,
       toast: useToast(),
-    };
+    }
   },
   computed: {
     getCategoryName() {
       return (categoryId) => {
-        const category = this.categories.find((c) => c.id === categoryId);
-        return category ? category.title : "Unknown";
-      };
+        const category = this.categories.find((c) => c.id === categoryId)
+        return category ? category.title : 'Unknown'
+      }
     },
   },
   async created() {
-    await this.fetchCategories();
-    await this.fetchSubCategories();
+    await this.fetchCategories()
+    await this.fetchSubCategories()
   },
   methods: {
     async fetchCategories() {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/admin/categories/get_all", headers);
-        this.categories = response;
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData('/admin/categories/get_all', headers)
+        this.categories = response
       } catch (error) {
-        this.toast.error("Failed to load main categories");
-        console.error(error);
+        this.toast.error('Failed to load main categories')
+        console.error(error)
       }
     },
 
     async fetchSubCategories() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/admin/subcategories/getall", headers);
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData('/admin/subcategories/getall', headers)
         this.subCategories = response.map((sub) => ({
           ...sub,
           editing: false,
           editName: sub.name,
           editCategoryId: sub.category_id,
-        }));
+        }))
       } catch (error) {
-        this.error = "Error loading data";
-        console.error(error);
+        this.error = 'Error loading data'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async addSubCategory() {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
 
         await postData(
-          "/admin/subcategories/store",
+          '/admin/subcategories/store',
           {
             category_id: this.selectedCategory,
             name: this.subCategoryName,
           },
           headers
-        );
+        )
 
-        this.toast.success("Added successfully");
-        this.subCategoryName = "";
-        this.selectedCategory = "";
-        await this.fetchSubCategories();
+        this.toast.success('Added successfully')
+        this.subCategoryName = ''
+        this.selectedCategory = ''
+        await this.fetchSubCategories()
       } catch (error) {
-        this.toast.error("Addition failed");
-        console.error(error);
+        this.toast.error('Addition failed')
+        console.error(error)
       }
     },
 
     startEditing(sub) {
-      sub.editing = true;
+      sub.editing = true
     },
 
     cancelEditing(sub) {
-      sub.editing = false;
-      sub.editName = sub.name;
-      sub.editCategoryId = sub.category_id;
+      sub.editing = false
+      sub.editName = sub.name
+      sub.editCategoryId = sub.category_id
     },
 
     async saveChanges(sub) {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
 
         // تحويل القيم إلى النوع المطلوب
         const payload = {
           category_id: String(sub.editCategoryId), // تحويل إلى string
           name: sub.editName,
-        };
+        }
 
         // إضافة category_id كمعلمة في الرابط
         await putData(
           `/admin/subcategories/update/${sub.id}?category_id=${payload.category_id}`,
           payload,
           headers
-        );
+        )
 
-        sub.name = sub.editName;
-        sub.category_id = sub.editCategoryId;
-        sub.editing = false;
-        this.toast.success("تم التحديث بنجاح");
+        sub.name = sub.editName
+        sub.category_id = sub.editCategoryId
+        sub.editing = false
+        this.toast.success('تم التحديث بنجاح')
       } catch (error) {
-        this.toast.error("فشل في التحديث");
-        console.error(error);
+        this.toast.error('فشل في التحديث')
+        console.error(error)
       }
     },
 
     // تعديل دالة الجلب لتحويل القيم إلى strings
     async FetchSubCategories() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/admin/subcategories/getall", headers);
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData('/admin/subcategories/getall', headers)
 
         this.subCategories = response.map((sub) => ({
           ...sub,
           editing: false,
           editName: sub.name,
           editCategoryId: String(sub.category_id), // تحويل إلى string
-        }));
+        }))
       } catch (error) {
-        this.error = "حدث خطأ أثناء جلب البيانات";
-        console.error(error);
+        this.error = 'حدث خطأ أثناء جلب البيانات'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async confirmDelete(id) {
-      if (!confirm("Are you sure you want to delete?")) return;
+      if (!confirm('Are you sure you want to delete?')) return
 
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
 
         // الحصول على الـ category_id من البيانات المحلية
-        const subCategory = this.subCategories.find((sub) => sub.id === id);
+        const subCategory = this.subCategories.find((sub) => sub.id === id)
 
         await deleteData(
           `/admin/subcategories/delete/${id}?category_id=${String(
             subCategory.category_id
           )}`,
           headers
-        );
+        )
 
-        this.toast.success("Deleted successfully");
-        await this.FetchSubCategories();
+        this.toast.success('Deleted successfully')
+        await this.FetchSubCategories()
       } catch (error) {
-        this.toast.error("Deletion failed");
-        console.error(error);
+        this.toast.error('Deletion failed')
+        console.error(error)
       }
     },
 
     formatDate(dateString) {
-      const options = { year: "numeric", month: "long", day: "numeric" };
-      return new Date(dateString).toLocaleDateString("en-US", options);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' }
+      return new Date(dateString).toLocaleDateString('en-US', options)
     },
   },
-};
+}
 </script>
 
 <style scoped>

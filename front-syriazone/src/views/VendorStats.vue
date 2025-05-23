@@ -74,7 +74,7 @@
           </div>
           <div class="card-content">
             <h3>Total Sales</h3>
-            <p>${{ statsData.total_sales || "0.00" }}</p>
+            <p>${{ statsData.total_sales || '0.00' }}</p>
           </div>
         </div>
 
@@ -84,7 +84,7 @@
           </div>
           <div class="card-content">
             <h3>Total Commission</h3>
-            <p>${{ statsData.total_commission || "0.00" }}</p>
+            <p>${{ statsData.total_commission || '0.00' }}</p>
           </div>
         </div>
 
@@ -94,7 +94,7 @@
           </div>
           <div class="card-content">
             <h3>Orders Count</h3>
-            <p>{{ statsData.filter.orders_count || "0" }}</p>
+            <p>{{ statsData.filter.orders_count || '0' }}</p>
           </div>
         </div>
       </div>
@@ -208,77 +208,77 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData2, getData } from "@/api";
-import { useToast } from "vue-toastification";
+import SideBar from '@/components/SideBar.vue'
+import { getData2 } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "VendorStats",
+  name: 'VendorStats',
   components: { SideBar },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
       vendors: [],
       vendorProducts: [],
-      selectedVendor: "",
-      selectedProduct: "",
-      selectedStatus: "all",
-      startDate: "",
-      endDate: "",
+      selectedVendor: '',
+      selectedProduct: '',
+      selectedStatus: 'all',
+      startDate: '',
+      endDate: '',
       statsData: null,
       productStats: null,
       loading: false,
       error: null,
-    };
+    }
   },
   methods: {
     async fetchVendors() {
-      this.loading = true;
+      this.loading = true
       try {
-        const token = localStorage.getItem("access_token");
-        const response = await getData2("/admin/vendores/get_by_status", {
+        const token = localStorage.getItem('access_token')
+        const response = await getData2('/admin/vendores/get_by_status', {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        this.vendors = response.data || [];
-        console.log(this.vendors);
+        })
+        this.vendors = response.data || []
+        console.log(this.vendors)
       } catch (error) {
-        this.error = "Failed to load vendors";
-        this.toast.error(this.error);
+        this.error = 'Failed to load vendors'
+        this.toast.error(this.error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async fetchVendorProducts() {
-      if (!this.selectedVendor) return;
-      this.loading = true;
+      if (!this.selectedVendor) return
+      this.loading = true
       try {
-        const token = localStorage.getItem("access_token");
+        const token = localStorage.getItem('access_token')
         const response = await getData2(
           `/admin/product/vendor/${this.selectedVendor}`,
 
           {
             headers: { Authorization: `Bearer ${token}` },
           }
-        );
-        console.log(response);
-        this.vendorProducts = response.products.data || [];
+        )
+        console.log(response)
+        this.vendorProducts = response.products.data || []
       } catch (error) {
-        this.error = "Failed to load vendor products";
-        this.toast.error(this.error);
+        this.error = 'Failed to load vendor products'
+        this.toast.error(this.error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async fetchStats() {
-      this.loading = true;
+      this.loading = true
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
 
         // if (this.selectedProduct) {
         //   const params = {
@@ -300,41 +300,41 @@ export default {
           status: this.selectedStatus,
           start_date: this.startDate,
           end_date: this.endDate,
-        };
-        const config = { params, headers };
-        console.log(this.selectedVendor);
+        }
+        const config = { params, headers }
+        console.log(this.selectedVendor)
         const response = await getData2(
           `/admin/commissions/calculate/${this.selectedVendor}`,
           config
-        );
-        console.log(response);
-        this.statsData = response;
-        this.productStats = null;
+        )
+        console.log(response)
+        this.statsData = response
+        this.productStats = null
         // }
       } catch (error) {
-        console.log(error);
-        this.error = "Failed to load statistics";
-        this.toast.error(this.error);
+        console.log(error)
+        this.error = 'Failed to load statistics'
+        this.toast.error(this.error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     formatDate(dateString) {
-      if (!dateString) return "";
-      const options = { year: "numeric", month: "short", day: "numeric" };
-      return new Date(dateString).toLocaleDateString("en-US", options);
+      if (!dateString) return ''
+      const options = { year: 'numeric', month: 'short', day: 'numeric' }
+      return new Date(dateString).toLocaleDateString('en-US', options)
     },
 
     exportToExcel() {
       // Implement Excel export functionality here
-      this.toast.info("Export to Excel functionality will be implemented");
+      this.toast.info('Export to Excel functionality will be implemented')
     },
   },
   created() {
-    this.fetchVendors();
+    this.fetchVendors()
   },
-};
+}
 </script>
 
 <style scoped>

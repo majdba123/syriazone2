@@ -50,100 +50,106 @@
 </template>
 
 <script>
-import { getData } from "@/api";
-import { useToast } from "vue-toastification";
-import SideBarvendor from "@/components/SideBarvendor.vue";
+import { getData } from '@/api'
+import { useToast } from 'vue-toastification'
+import SideBarvendor from '@/components/SideBarvendor.vue'
 
 export default {
-  name: "SubcategoryVendor",
+  name: 'SubcategoryVendor',
   components: {
     SideBarvendor,
   },
   data() {
     return {
-      subCategoryName: "",
-      selectedCategory: "",
+      subCategoryName: '',
+      selectedCategory: '',
       categories: [],
       subCategories: [],
       loading: false,
       error: null,
       toast: useToast(),
-    };
+    }
   },
   computed: {
     getCategoryName() {
       return (categoryId) => {
-        const category = this.categories.find((c) => c.id === categoryId);
-        return category ? category.title : "Unknown";
-      };
+        const category = this.categories.find((c) => c.id === categoryId)
+        return category ? category.title : 'Unknown'
+      }
     },
   },
   async created() {
-    await this.fetchCategories();
-    await this.fetchSubCategories();
+    await this.fetchCategories()
+    await this.fetchSubCategories()
   },
   methods: {
     async fetchCategories() {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/vendor/categories/get_all", headers);
-        this.categories = response;
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData('/vendor/categories/get_all', headers)
+        this.categories = response
       } catch (error) {
-        this.toast.error("Failed to load main categories");
-        console.error(error);
+        this.toast.error('Failed to load main categories')
+        console.error(error)
       }
     },
 
     async fetchSubCategories() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/vendor/subcategories/getall", headers);
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData(
+          '/vendor/subcategories/getall_subcategory',
+          headers
+        )
         this.subCategories = response.map((sub) => ({
           ...sub,
           editing: false,
           editName: sub.name,
           editCategoryId: sub.category_id,
-        }));
+        }))
       } catch (error) {
-        this.error = "Error loading data";
-        console.error(error);
+        this.error = 'Error loading data'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async FetchSubCategories() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const response = await getData("/vendor/subcategories/getall", headers);
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const response = await getData(
+          '/vendor/subcategories/getall_subcategory',
+          headers
+        )
 
         this.subCategories = response.map((sub) => ({
           ...sub,
           editing: false,
           editName: sub.name,
           editCategoryId: String(sub.category_id), // تحويل إلى string
-        }));
+        }))
       } catch (error) {
-        this.error = "حدث خطأ أثناء جلب البيانات";
-        console.error(error);
+        this.error = 'حدث خطأ أثناء جلب البيانات'
+        console.error(error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     formatDate(dateString) {
-      const options = { year: "numeric", month: "long", day: "numeric" };
-      return new Date(dateString).toLocaleDateString("en-US", options);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' }
+      return new Date(dateString).toLocaleDateString('en-US', options)
     },
   },
-};
+}
 </script>
 
 <style scoped>

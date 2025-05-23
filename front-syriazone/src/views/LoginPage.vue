@@ -45,52 +45,52 @@
 </template>
 
 <script>
-import { postData } from "@/api";
+import { postData } from '@/api'
 export default {
   data() {
     return {
-      email: "",
-      password: "",
-    };
+      email: '',
+      password: '',
+    }
   },
   methods: {
     async handleSubmit() {
       const userData = {
         email: this.email,
         password: this.password,
-      };
+      }
       try {
-        const response = await postData("/api/login", userData);
-        console.log(response);
-        if (response.access_token.original.user_type == "Admin") {
+        const response = await postData('/login', userData)
+        console.log(response)
+        if (response.access_token.original.user_type == 'Admin') {
           window.localStorage.setItem(
-            "access_token",
+            'access_token',
             response.access_token.original.token
-          );
+          )
           window.localStorage.setItem(
-            "user_type",
+            'user_type',
             response.access_token.original.user_type
-          );
-          console.log("sss");
-          this.$router.push("/AdminPage");
+          )
+          console.log('sss')
+          this.$router.push('/AdminPage')
         }
-        if (response.access_token.original.user_type == "Vendor") {
+        if (response.access_token.original.user_type == 'Vendor') {
           window.localStorage.setItem(
-            "access_token",
+            'access_token',
             response.access_token.original.token
-          );
+          )
           window.localStorage.setItem(
-            "user_type",
+            'user_type',
             response.access_token.original.user_type
-          );
-          this.$router.push("/Vendorlogin");
+          )
+          this.$router.push('/Vendorlogin')
         }
       } catch (error) {
-        console.error("Error posting data:", error);
+        console.error('Error posting data:', error)
       }
     },
   },
-};
+}
 </script>
 
 <style scoped>
@@ -100,7 +100,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: url("@/assets/background.webp"); /* ضع رابط الخلفية هنا */
+  background-image: url('@/assets/background.webp'); /* ضع رابط الخلفية هنا */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

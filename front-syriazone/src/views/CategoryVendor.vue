@@ -60,56 +60,56 @@
 </template>
 
 <script>
-import { getData } from "@/api";
-import { useToast } from "vue-toastification";
-import SideBarvendor from "@/components/SideBarvendor.vue";
+import { getData } from '@/api'
+import { useToast } from 'vue-toastification'
+import SideBarvendor from '@/components/SideBarvendor.vue'
 
 export default {
-  name: "CategoryVendor",
+  name: 'CategoryVendor',
   components: {
     SideBarvendor,
   },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
-      title: "",
-      percent: "",
+      title: '',
+      percent: '',
       categories: [],
       loading: false,
       error: null,
-    };
+    }
   },
   async created() {
-    await this.fetchCategories();
+    await this.fetchCategories()
   },
   methods: {
     async fetchCategories() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
 
-      const token = window.localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
+      const token = window.localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
 
       try {
-        const response = await getData("/vendor/categories/get_all", headers);
+        const response = await getData('/vendor/categories/get_all', headers)
         this.categories = response.map((cat) => ({
           ...cat,
           editing: false,
           editTitle: cat.title,
           editPercent: cat.percent,
-        }));
+        }))
       } catch (error) {
-        this.error = "Failed to load categories. Please try again.";
-        console.error("Error fetching categories:", error);
+        this.error = 'Failed to load categories. Please try again.'
+        console.error('Error fetching categories:', error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
   },
-};
+}
 </script>
 
 <style scoped>

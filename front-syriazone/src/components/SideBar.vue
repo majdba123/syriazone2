@@ -50,6 +50,12 @@
           </router-link>
         </li>
         <li>
+          <router-link to="/CoponStats" class="menu-item">
+            <i class="fas fa-chart-line"></i>
+            <span class="menu-text">Copon Stats</span>
+          </router-link>
+        </li>
+        <li>
           <router-link to="/settings" class="menu-item">
             <i class="fas fa-cog"></i>
             <span class="menu-text">Settings</span>
@@ -68,47 +74,47 @@
 </template>
 
 <script>
-import { postData } from "@/api";
-import { useToast } from "vue-toastification";
+import { postData } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "SideBar",
+  name: 'SideBar',
   data() {
     return {
       isSidebarOpen: false,
       hoverOpen: false,
-    };
+    }
   },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   methods: {
     toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen;
+      this.isSidebarOpen = !this.isSidebarOpen
     },
     async logout() {
       try {
-        const token = localStorage.getItem("access_token");
-        const headers = { Authorization: `Bearer ${token}` };
-        const data = null;
-        await postData("/api/logout", data, headers);
+        const token = localStorage.getItem('access_token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const data = null
+        await postData('/logout', data, headers)
 
-        localStorage.removeItem("access_token");
-        this.$router.push("/LoginPage");
-        this.toast.success("Logged out successfully");
+        localStorage.removeItem('access_token')
+        this.$router.push('/LoginPage')
+        this.toast.success('Logged out successfully')
       } catch (error) {
-        this.toast.error("Failed to logout");
-        console.error("Logout error:", error);
+        this.toast.error('Failed to logout')
+        console.error('Logout error:', error)
       }
     },
   },
   computed: {
     sidebarVisible() {
-      return this.isSidebarOpen || this.hoverOpen;
+      return this.isSidebarOpen || this.hoverOpen
     },
   },
-};
+}
 </script>
 
 <style scoped>

@@ -132,98 +132,98 @@
 </template>
 
 <script>
-import SideBar from "@/components/SideBar.vue";
-import { getData, postData, putData, deleteData } from "@/api";
-import { useToast } from "vue-toastification";
+import SideBar from '@/components/SideBar.vue'
+import { getData, postData, putData, deleteData } from '@/api'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "AddCategory",
+  name: 'AddCategory',
   components: {
     SideBar,
   },
   setup() {
-    const toast = useToast();
-    return { toast };
+    const toast = useToast()
+    return { toast }
   },
   data() {
     return {
-      title: "",
-      percent: "",
+      title: '',
+      percent: '',
       categories: [],
       loading: false,
       error: null,
-    };
+    }
   },
   async created() {
-    await this.fetchCategories();
+    await this.fetchCategories()
   },
   methods: {
     async fetchCategories() {
-      this.loading = true;
-      this.error = null;
+      this.loading = true
+      this.error = null
 
-      const token = window.localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
+      const token = window.localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
 
       try {
-        const response = await getData("/admin/categories/get_all", headers);
+        const response = await getData('/admin/categories/get_all', headers)
         this.categories = response.map((cat) => ({
           ...cat,
           editing: false,
           editTitle: cat.title,
           editPercent: cat.percent,
-        }));
+        }))
       } catch (error) {
-        this.error = "Failed to load categories. Please try again.";
-        console.error("Error fetching categories:", error);
+        this.error = 'Failed to load categories. Please try again.'
+        console.error('Error fetching categories:', error)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
 
     async addCategory() {
-      const token = window.localStorage.getItem("access_token");
+      const token = window.localStorage.getItem('access_token')
       const headers = {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
+        'Content-Type': 'application/json',
+      }
 
       try {
         await postData(
-          "/admin/categories/store",
+          '/admin/categories/store',
           {
             title: this.title,
             percent: this.percent,
           },
           headers
-        );
+        )
 
-        this.toast.success("Category added successfully");
-        this.title = "";
-        this.percent = "";
-        await this.fetchCategories();
+        this.toast.success('Category added successfully')
+        this.title = ''
+        this.percent = ''
+        await this.fetchCategories()
       } catch (error) {
-        this.toast.error("Failed to add category");
-        console.error("Error adding category:", error);
+        this.toast.error('Failed to add category')
+        console.error('Error adding category:', error)
       }
     },
 
     enableEditing(category) {
-      category.editing = true;
+      category.editing = true
     },
 
     cancelEditing(category) {
-      category.editing = false;
-      category.editTitle = category.title;
-      category.editPercent = category.percent;
+      category.editing = false
+      category.editTitle = category.title
+      category.editPercent = category.percent
     },
 
     async saveChanges(category) {
-      const token = window.localStorage.getItem("access_token");
+      const token = window.localStorage.getItem('access_token')
       const headers = {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
+        'Content-Type': 'application/json',
+      }
 
       try {
         await putData(
@@ -233,35 +233,35 @@ export default {
             percent: category.editPercent,
           },
           headers
-        );
+        )
 
-        this.toast.success("Category updated successfully");
-        category.title = category.editTitle;
-        category.percent = category.editPercent;
-        category.editing = false;
+        this.toast.success('Category updated successfully')
+        category.title = category.editTitle
+        category.percent = category.editPercent
+        category.editing = false
       } catch (error) {
-        this.toast.error("Failed to update category");
-        console.error("Error updating category:", error);
+        this.toast.error('Failed to update category')
+        console.error('Error updating category:', error)
       }
     },
 
     async deleteCategory(id) {
-      if (!confirm("Are you sure you want to delete this category?")) return;
+      if (!confirm('Are you sure you want to delete this category?')) return
 
-      const token = window.localStorage.getItem("access_token");
-      const headers = { Authorization: `Bearer ${token}` };
+      const token = window.localStorage.getItem('access_token')
+      const headers = { Authorization: `Bearer ${token}` }
 
       try {
-        await deleteData(`/admin/categories/delete/${id}`, headers);
-        this.toast.success("Category deleted successfully");
-        await this.fetchCategories();
+        await deleteData(`/admin/categories/delete/${id}`, headers)
+        this.toast.success('Category deleted successfully')
+        await this.fetchCategories()
       } catch (error) {
-        this.toast.error("Failed to delete category");
-        console.error("Error deleting category:", error);
+        this.toast.error('Failed to delete category')
+        console.error('Error deleting category:', error)
       }
     },
   },
-};
+}
 </script>
 
 <style scoped>
