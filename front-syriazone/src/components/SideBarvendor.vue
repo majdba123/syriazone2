@@ -87,7 +87,7 @@ export default {
         const token = localStorage.getItem('access_token')
         const headers = { Authorization: `Bearer ${token}` }
         const data = null
-        await postData('/api/logout', data, headers)
+        await postData('/logout', data, headers)
 
         localStorage.removeItem('access_token')
         this.$router.push('/LoginPage')
